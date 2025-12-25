@@ -19,27 +19,57 @@
             padding: 20px;
         }
 
-        .header {
-            background: linear-gradient(90deg, #2d2d44 0%, #3a3a5d 100%);
-            color: #ffffff;
-            padding: 25px 30px;
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            border-radius: 20px;
+        .main-header {
+            text-align: center;
             margin-bottom: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #6a5acd, #9370db, #8a2be2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #a0a0c0;
+            font-style: italic;
+            height: 24px;
+            opacity: 0.9;
+            transition: opacity 0.5s ease;
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 40px 0 20px;
+            padding: 15px 30px;
+            background: linear-gradient(90deg, rgba(45, 45, 68, 0.7), rgba(58, 58, 93, 0.7));
+            border-radius: 15px;
+            display: inline-block;
             border: 1px solid #4a4a6d;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 30px;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
+            padding: 20px 0;
         }
 
         .item {
@@ -94,12 +124,23 @@
             color: #f0f0ff;
         }
 
+        .kriperovich2-section .item {
+            opacity: 0.9;
+        }
+
+        .kriperovich2-section .item:hover {
+            opacity: 1;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 1024px) {
             .grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 25px;
-                padding: 15px;
+            }
+            
+            .title {
+                font-size: 3rem;
             }
         }
 
@@ -109,66 +150,111 @@
                 gap: 20px;
             }
             
-            .header {
-                font-size: 2rem;
-                padding: 20px;
-                margin-bottom: 30px;
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .section-header {
+                font-size: 1.8rem;
+                padding: 12px 25px;
             }
         }
 
-        /* Special style for the "Nothing" items */
-        .item:nth-child(4),
-        .item:nth-child(5),
-        .item:nth-child(6) {
-            opacity: 0.9;
-        }
-
-        .item:nth-child(4):hover,
-        .item:nth-child(5):hover,
-        .item:nth-child(6):hover {
-            opacity: 1;
+        @media (max-width: 480px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .section-header {
+                font-size: 1.5rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">Kriperovich</div>
-    <div class="grid">
-        <div class="item">
-            <a href="https://kriperovich.github.io/figures/" target="_blank">
-                <img src="image1.png" alt="Figures Project">
-                <div class="description">Figures</div>
-            </a>
+    <div class="main-header">
+        <div class="title">Kriperovich</div>
+        <div class="subtitle" id="random-subtitle">#IuseProsAndArchAndKripOSbtw</div>
+    </div>
+
+    <div class="section-container">
+        <div class="section-header">Kriperovich</div>
+        <div class="grid">
+            <div class="item">
+                <a href="https://kriperovich.github.io/figures/" target="_blank">
+                    <img src="image1.png" alt="Figures Project">
+                    <div class="description">Figures</div>
+                </a>
+            </div>
+            <div class="item">
+                <a href="https://github.com/Kriperovich/TMGC" target="_blank">
+                    <img src="image2.png" alt="TMGC Project">
+                    <div class="description">TMGC</div>
+                </a>
+            </div>
+            <div class="item">
+                <a href="https://github.com/Kriperovich/html-opener-library" target="_blank">
+                    <img src="image3.png" alt="HTML Opener Library">
+                    <div class="description">html-opener-library</div>
+                </a>
+            </div>
         </div>
-        <div class="item">
-            <a href="https://github.com/Kriperovich/TMGC" target="_blank">
-                <img src="image2.png" alt="TMGC Project">
-                <div class="description">TMGC</div>
-            </a>
-        </div>
-        <div class="item">
-            <a href="https://github.com/Kriperovich/html-opener-library" target="_blank">
-                <img src="image3.png" alt="HTML Opener Library">
-                <div class="description">html-opener-library</div>
-            </a>
-        </div>
-        <div class="item">
-            <a href="Nothing" target="_blank">
-                <img src="image4.png" alt="Placeholder">
-                <div class="description">Nothing</div>
-            </a>
-        </div>
-        <div class="item">
-            <a href="https://youtu.be/dQw4w9WgXcQ?si=WkAKTAyNY_Y9DDRY" target="_blank">
-                <img src="image5.png" alt="Placeholder">
-                <div class="description">Nothing</div>
-            </a>
-        </div>
-        <div class="item">
-            <a href="https://youtu.be/dQw4w9WgXcQ?si=WkAKTAyNY_Y9DDRY" target="_blank">
-                <img src="image6.png" alt="Placeholder">
-                <div class="description">Nothing</div>
-            </a>
+
+        <div class="section-header">Kriperovich2</div>
+        <div class="grid kriperovich2-section">
+            <div class="item">
+                <a href="Nothing" target="_blank">
+                    <img src="image4.png" alt="Placeholder">
+                    <div class="description">Nothing</div>
+                </a>
+            </div>
+            <div class="item">
+                <a href="https://youtu.be/dQw4w9WgXcQ?si=WkAKTAyNY_Y9DDRY" target="_blank">
+                    <img src="image5.png" alt="Placeholder">
+                    <div class="description">Nothing</div>
+                </a>
+            </div>
+            <div class="item">
+                <a href="https://youtu.be/dQw4w9WgXcQ?si=WkAKTAyNY_Y9DDRY" target="_blank">
+                    <img src="image6.png" alt="Placeholder">
+                    <div class="description">Nothing</div>
+                </a>
+            </div>
         </div>
     </div>
+
+    <script>
+        const subtitles = [
+            "#IuseProsAndArchAndKripOSbtw",
+            "Boom boom boom, i want you in my room",
+            "я гей кстати"
+        ];
+        
+        const subtitleElement = document.getElementById('random-subtitle');
+        
+        function getRandomSubtitle() {
+            const randomIndex = Math.floor(Math.random() * subtitles.length);
+            return subtitles[randomIndex];
+        }
+        
+        function animateSubtitle() {
+            subtitleElement.style.opacity = '0';
+            
+            setTimeout(() => {
+                subtitleElement.textContent = getRandomSubtitle();
+                subtitleElement.style.opacity = '0.9';
+            }, 500);
+        }
+        
+        subtitleElement.textContent = getRandomSubtitle();
+        
+        setInterval(animateSubtitle, 3000);
+        
+        subtitleElement.addEventListener('click', animateSubtitle);
+    </script>
 </body>
 </html>
