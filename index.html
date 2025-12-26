@@ -32,7 +32,7 @@
             background: linear-gradient(135deg, #0c0b1a 0%, #1a0b2e 30%, #2d0b3e 70%, #3d0b4e 100%);
         }
 
-        /* Звёзды */
+        /* Звёзды с возможностью соединения */
         .stars {
             position: absolute;
             top: 0;
@@ -47,6 +47,32 @@
             background-color: #fff;
             border-radius: 50%;
             animation: twinkle 3s infinite alternate;
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 1;
+        }
+
+        .star:hover::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(138, 43, 226, 0.5), transparent);
+            transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+
+        .star-connection {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(138, 43, 226, 0.3), transparent);
+            transform-origin: 0 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         /* Туманности */
@@ -101,7 +127,7 @@
         /* Контент поверх фона */
         .content {
             position: relative;
-            z-index: 1;
+            z-index: 2;
             padding: 20px;
         }
 
@@ -202,6 +228,11 @@
             transition: opacity 0.3s ease;
         }
 
+        .item-content {
+            position: relative;
+            z-index: 1;
+        }
+
         .item:hover {
             transform: translateY(-8px);
             box-shadow: 0 15px 35px rgba(138, 43, 226, 0.2),
@@ -213,11 +244,10 @@
             opacity: 1;
         }
 
-        .item a {
+        .item a.main-link {
             text-decoration: none;
             color: inherit;
             display: block;
-            height: 100%;
         }
 
         .item img {
@@ -249,12 +279,71 @@
             color: #f0e6ff;
         }
 
+        /* Кнопки под проектом */
+        .item-buttons {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: rgba(42, 42, 62, 0.9);
+            backdrop-filter: blur(10px);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            border-top: 1px solid rgba(138, 43, 226, 0.2);
+            border-radius: 0 0 20px 20px;
+            z-index: 2;
+        }
+
+        .item:hover .item-buttons {
+            transform: translateY(0);
+        }
+
+        .item-btn {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: linear-gradient(90deg, rgba(138, 43, 226, 0.3), rgba(147, 112, 219, 0.3));
+            border: 1px solid rgba(138, 43, 226, 0.4);
+            border-radius: 10px;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .item-btn:hover {
+            background: linear-gradient(90deg, rgba(138, 43, 226, 0.5), rgba(147, 112, 219, 0.5));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3);
+        }
+
         .kriperovich2-section .item {
             opacity: 0.9;
         }
 
         .kriperovich2-section .item:hover {
             opacity: 1;
+        }
+
+        /* Для мобильных устройств - кнопки всегда видны */
+        @media (max-width: 768px) {
+            .item-buttons {
+                position: relative;
+                transform: translateY(0);
+                background: rgba(42, 42, 62, 0.7);
+                border-top: none;
+                margin-top: -5px;
+                border-radius: 0 0 20px 20px;
+            }
+
+            .item {
+                padding-bottom: 0;
+            }
         }
 
         /* Responsive adjustments */
@@ -297,6 +386,11 @@
             .subtitle {
                 font-size: 0.9rem;
             }
+            
+            .item-btn {
+                padding: 8px;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
@@ -318,44 +412,68 @@
             <div class="section-header">Kriperovich</div>
             <div class="grid">
                 <div class="item">
-                    <a href="https://kriperovich.github.io/figures/" target="_blank">
+                    <a href="https://kriperovich.github.io/figures/" target="_blank" class="main-link">
                         <img src="image1.png" alt="Figures Project">
                         <div class="description">Figures</div>
                     </a>
+                    <div class="item-buttons">
+                        <a href="https://github.com/Kriperovich/figures" target="_blank" class="item-btn">Source Code</a>
+                        <a href="https://kriperovich.github.io/figures/" target="_blank" class="item-btn">View</a>
+                    </div>
                 </div>
                 <div class="item">
-                    <a href="https://github.com/Kriperovich/TMGC" target="_blank">
+                    <a href="https://github.com/Kriperovich/TMGC" target="_blank" class="main-link">
                         <img src="image2.png" alt="TMGC Project">
                         <div class="description">TMGC</div>
                     </a>
+                    <div class="item-buttons">
+                        <a href="https://github.com/Kriperovich/TMGC" target="_blank" class="item-btn">Source Code</a>
+                        <a href="https://github.com/Kriperovich/TMGC#readme" target="_blank" class="item-btn">View</a>
+                    </div>
                 </div>
                 <div class="item">
-                    <a href="https://github.com/Kriperovich/html-opener-library" target="_blank">
+                    <a href="https://github.com/Kriperovich/html-opener-library" target="_blank" class="main-link">
                         <img src="image3.png" alt="HTML Opener Library">
                         <div class="description">html-opener-library</div>
                     </a>
+                    <div class="item-buttons">
+                        <a href="https://github.com/Kriperovich/html-opener-library" target="_blank" class="item-btn">Source Code</a>
+                        <a href="https://github.com/Kriperovich/html-opener-library#readme" target="_blank" class="item-btn">View</a>
+                    </div>
                 </div>
             </div>
 
             <div class="section-header">Kriperovich2</div>
             <div class="grid kriperovich2-section">
                 <div class="item">
-                    <a href="https://github.com/Kriperovich2/kripos" target="">
-                        <img src="image4.jpg" alt="Placeholder">
-                        <div class="description">KripOS</div>
+                    <a href="https://github.com/kriperovich2/kripos" target="_blank" class="main-link">
+                        <img src="image4.jpg" alt="Kripos Project">
+                        <div class="description">Kripos</div>
                     </a>
+                    <div class="item-buttons">
+                        <a href="https://github.com/kriperovich2/kripos" target="_blank" class="item-btn">Source Code</a>
+                        <a href="https://github.com/kriperovich2/kripos#readme" target="_blank" class="item-btn">View</a>
+                    </div>
                 </div>
                 <div class="item">
-                    <a href="https://youtu.be/dQw4w9WgXcQ?si=WkAKTAyNY_Y9DDRY" target="_blank">
+                    <a href="https://youtu.be/dQw4w9WgXcQ?si=WkAKTAyNY_Y9DDRY" target="_blank" class="main-link">
                         <img src="image5.png" alt="Placeholder">
                         <div class="description">Nothing</div>
                     </a>
+                    <div class="item-buttons">
+                        <a href="#" class="item-btn">Source Code</a>
+                        <a href="https://youtu.be/dQw4w9WgXcQ?si=WkAKTAyNY_Y9DDRY" target="_blank" class="item-btn">View</a>
+                    </div>
                 </div>
                 <div class="item">
-                    <a href="https://youtu.be/dQw4w9WgXcQ?si=WkAKTAyNY_Y9DDRY" target="_blank">
+                    <a href="https://youtu.be/dQw4w9WgXcQ?si=WkAKTAyNY_Y9DDRY" target="_blank" class="main-link">
                         <img src="image6.png" alt="Placeholder">
                         <div class="description">Nothing</div>
                     </a>
+                    <div class="item-buttons">
+                        <a href="#" class="item-btn">Source Code</a>
+                        <a href="https://youtu.be/dQw4w9WgXcQ?si=WkAKTAyNY_Y9DDRY" target="_blank" class="item-btn">View</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -388,10 +506,11 @@
         setInterval(animateSubtitle, 3000);
         subtitleElement.addEventListener('click', animateSubtitle);
         
-        // Создание звёзд
+        // Создание звёзд с возможностью соединения
         function createStars() {
             const starsContainer = document.getElementById('stars-container');
-            const starCount = 150;
+            const starCount = 80;
+            const stars = [];
             
             for (let i = 0; i < starCount; i++) {
                 const star = document.createElement('div');
@@ -410,11 +529,110 @@
                 star.style.animationDelay = `${delay}s`;
                 star.style.animationDuration = `${duration}s`;
                 
+                // Сохраняем координаты для соединения
+                star.dataset.x = x;
+                star.dataset.y = y;
+                star.dataset.index = i;
+                
                 starsContainer.appendChild(star);
+                stars.push({element: star, x, y, index: i});
+                
+                // Добавляем обработчик для показа линий при наведении между звёздами
+                star.addEventListener('mouseenter', () => {
+                    createConnections(stars, star);
+                });
+                
+                star.addEventListener('mouseleave', () => {
+                    removeConnections();
+                });
             }
+            
+            return stars;
         }
         
-        createStars();
+        // Создание соединений между звёздами
+        function createConnections(stars, hoveredStar) {
+            const starsContainer = document.getElementById('stars-container');
+            const hoveredIndex = parseInt(hoveredStar.dataset.index);
+            const hoveredX = parseFloat(hoveredStar.dataset.x);
+            const hoveredY = parseFloat(hoveredStar.dataset.y);
+            
+            // Удаляем старые соединения
+            removeConnections();
+            
+            // Создаём соединения с ближайшими звёздами
+            stars.forEach((star, index) => {
+                if (index === hoveredIndex) return;
+                
+                const starX = parseFloat(star.element.dataset.x);
+                const starY = parseFloat(star.element.dataset.y);
+                
+                // Рассчитываем расстояние между звёздами
+                const distance = Math.sqrt(
+                    Math.pow(starX - hoveredX, 2) + 
+                    Math.pow(starY - hoveredY, 2)
+                );
+                
+                // Соединяем только если звёзды достаточно близко
+                if (distance < 15) {
+                    const connection = document.createElement('div');
+                    connection.classList.add('star-connection');
+                    
+                    // Рассчитываем длину и угол линии
+                    const length = distance;
+                    const angle = Math.atan2(starY - hoveredY, starX - hoveredX) * 180 / Math.PI;
+                    
+                    // Устанавливаем позицию и размер
+                    connection.style.width = `${length}%`;
+                    connection.style.left = `${hoveredX}%`;
+                    connection.style.top = `${hoveredY}%`;
+                    connection.style.transform = `rotate(${angle}deg)`;
+                    connection.style.opacity = '1';
+                    
+                    starsContainer.appendChild(connection);
+                }
+            });
+        }
+        
+        // Удаление всех соединений
+        function removeConnections() {
+            const connections = document.querySelectorAll('.star-connection');
+            connections.forEach(connection => {
+                connection.style.opacity = '0';
+                setTimeout(() => {
+                    if (connection.parentNode) {
+                        connection.parentNode.removeChild(connection);
+                    }
+                }, 300);
+            });
+        }
+        
+        const stars = createStars();
+        
+        // Добавляем обработчик для пространства между звёздами
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth) * 100;
+            const y = (e.clientY / window.innerHeight) * 100;
+            
+            // Проверяем, находится ли курсор достаточно близко к какой-либо звезде
+            let isNearStar = false;
+            stars.forEach(star => {
+                const starX = parseFloat(star.element.dataset.x);
+                const starY = parseFloat(star.element.dataset.y);
+                const distance = Math.sqrt(Math.pow(starX - x, 2) + Math.pow(starY - y, 2));
+                
+                if (distance < 5) {
+                    isNearStar = true;
+                    // Если курсор рядом со звездой, создаём соединения
+                    createConnections(stars, star.element);
+                }
+            });
+            
+            // Если курсор не рядом ни с одной звездой, удаляем соединения
+            if (!isNearStar) {
+                removeConnections();
+            }
+        });
     </script>
 </body>
 </html>
