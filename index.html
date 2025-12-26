@@ -19,6 +19,9 @@
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         /* Космический фиолетовый фон */
@@ -129,12 +132,18 @@
             position: relative;
             z-index: 2;
             padding: 20px;
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .main-header {
             text-align: center;
             margin-bottom: 40px;
             padding-top: 40px;
+            width: 100%;
         }
 
         .title {
@@ -191,8 +200,7 @@
             backdrop-filter: blur(12px);
             text-shadow: 0 0 20px rgba(138, 43, 226, 0.6);
             max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
+            width: 100%;
             transition: all 0.3s ease;
         }
 
@@ -203,10 +211,13 @@
         }
 
         .section-container {
-            max-width: 1400px;
+            max-width: 1200px;
+            width: 100%;
             margin: 0 auto;
             padding: 0 20px;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .grid {
@@ -214,6 +225,8 @@
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 30px;
             padding: 20px 0;
+            width: 100%;
+            justify-items: center; /* Центрируем карточки */
         }
 
         .item {
@@ -228,6 +241,8 @@
             backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
+            width: 100%;
+            max-width: 320px; /* Фиксированная максимальная ширина */
         }
 
         .item::before {
@@ -306,12 +321,13 @@
             background: rgba(42, 42, 62, 0.85);
             backdrop-filter: blur(12px);
             border-top: 1px solid rgba(138, 43, 226, 0.25);
-            justify-content: center;
+            justify-content: center; /* Центрируем кнопки горизонтально */
             align-items: center;
             opacity: 0;
             transform: translateY(20px);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 0 0 20px 20px;
+            width: 100%;
         }
 
         .item:hover .item-buttons {
@@ -334,6 +350,9 @@
             min-width: 120px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             letter-spacing: 0.5px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .item-btn:hover {
@@ -364,6 +383,7 @@
 
             .item {
                 padding-bottom: 0;
+                max-width: 100%;
             }
 
             .item-btn {
@@ -378,6 +398,11 @@
             .grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 25px;
+                max-width: 800px;
+            }
+            
+            .item {
+                max-width: 100%;
             }
             
             .title {
@@ -396,7 +421,6 @@
                 grid-template-columns: 1fr;
                 gap: 25px;
                 max-width: 500px;
-                margin: 0 auto;
             }
             
             .title {
