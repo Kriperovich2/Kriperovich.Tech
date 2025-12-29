@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kriperovich Projects</title>
+    <title>Project Name - Kriperovich</title>
     <!-- Добавляем favicon -->
     <link rel="icon" type="image/png" href="iconsite.png">
     <style>
@@ -107,7 +107,7 @@
             z-index: 2;
             padding: 20px;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1000px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -116,7 +116,7 @@
         /* Заголовок */
         .main-header {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 40px;
             padding-top: 40px;
             width: 100%;
         }
@@ -166,136 +166,128 @@
             text-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
         }
 
-        /* Сетка проектов */
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 40px;
-            padding: 20px 0;
+        /* Основная карточка проекта */
+        .project-container {
             width: 100%;
-            justify-items: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        @media (max-width: 1100px) {
-            .projects-grid {
-                grid-template-columns: 1fr;
-                max-width: 800px;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .projects-grid {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-        }
-
-        /* Карточка проекта */
-        .project-card {
+        .project-main-card {
             background: linear-gradient(145deg, rgba(42, 42, 62, 0.85), rgba(37, 37, 54, 0.9));
-            border-radius: 20px;
+            border-radius: 25px;
             overflow: hidden;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid rgba(138, 43, 226, 0.3);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3),
-                        inset 0 0 30px rgba(138, 43, 226, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4),
+                        inset 0 0 35px rgba(138, 43, 226, 0.12);
             position: relative;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
             display: flex;
             flex-direction: column;
             width: 100%;
-            max-width: 500px;
+            max-width: 800px;
         }
 
-        .project-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(138, 43, 226, 0.25),
-                        inset 0 0 40px rgba(138, 43, 226, 0.18);
+        .project-main-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(138, 43, 226, 0.3),
+                        inset 0 0 50px rgba(138, 43, 226, 0.18);
             border-color: #8a2be2;
         }
 
-        .project-card::before {
+        .project-main-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
+            height: 4px;
             background: linear-gradient(90deg, #8a2be2, #9370db, #ba55d3);
-            border-radius: 20px 20px 0 0;
+            border-radius: 25px 25px 0 0;
             opacity: 0;
             transition: opacity 0.3s ease;
         }
 
-        .project-card:hover::before {
+        .project-main-card:hover::before {
             opacity: 1;
         }
 
         /* Изображение проекта */
-        .project-image {
+        .project-image-container {
             width: 100%;
-            height: 280px;
-            object-fit: contain;
-            display: block;
-            background: rgba(30, 30, 46, 0.5);
-            padding: 20px;
-            border-bottom: 1px solid rgba(138, 43, 226, 0.2);
-            transition: transform 0.4s ease;
+            padding: 30px;
+            background: rgba(30, 30, 46, 0.6);
+            border-bottom: 1px solid rgba(138, 43, 226, 0.25);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .project-card:hover .project-image {
+        .project-image {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s ease;
+        }
+
+        .project-main-card:hover .project-image {
             transform: scale(1.02);
         }
 
         /* Контент проекта */
         .project-content {
-            padding: 25px;
+            padding: 35px;
             display: flex;
             flex-direction: column;
-            flex: 1;
         }
 
         .project-title {
-            font-size: 1.8rem;
-            font-weight: 700;
+            font-size: 2.5rem;
+            font-weight: 800;
             color: #ffffff;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             text-align: center;
-            text-shadow: 0 0 15px rgba(138, 43, 226, 0.4);
+            text-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+            letter-spacing: 1px;
         }
 
         .project-description {
-            font-size: 1.1rem;
-            line-height: 1.6;
+            font-size: 1.2rem;
+            line-height: 1.7;
             color: #d0d0e0;
-            margin-bottom: 25px;
+            margin-bottom: 35px;
             text-align: center;
-            flex: 1;
+            padding: 0 10px;
         }
 
         /* Кнопки проекта */
         .project-buttons {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             justify-content: center;
-            padding-top: 15px;
-            border-top: 1px solid rgba(138, 43, 226, 0.2);
+            padding-top: 25px;
+            border-top: 1px solid rgba(138, 43, 226, 0.25);
+            flex-wrap: wrap;
         }
 
         .project-btn {
-            padding: 12px 30px;
+            padding: 14px 35px;
             text-align: center;
             background: linear-gradient(135deg, rgba(138, 43, 226, 0.35), rgba(147, 112, 219, 0.35));
             border: 1px solid rgba(138, 43, 226, 0.45);
             border-radius: 12px;
             color: #ffffff;
-            font-weight: 600;
-            font-size: 0.95rem;
+            font-weight: 700;
+            font-size: 1.05rem;
             cursor: pointer;
             transition: all 0.25s ease;
             text-decoration: none;
-            min-width: 140px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            min-width: 160px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
             letter-spacing: 0.5px;
             display: inline-flex;
             justify-content: center;
@@ -304,50 +296,88 @@
 
         .project-btn:hover {
             background: linear-gradient(135deg, rgba(138, 43, 226, 0.55), rgba(147, 112, 219, 0.55));
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 20px rgba(138, 43, 226, 0.35);
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 12px 25px rgba(138, 43, 226, 0.4);
             border-color: rgba(138, 43, 226, 0.7);
         }
 
+        /* Дополнительная информация (опционально) */
+        .project-details {
+            margin-top: 40px;
+            width: 100%;
+            max-width: 800px;
+            padding: 25px;
+            background: rgba(42, 42, 62, 0.7);
+            border-radius: 20px;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .details-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+        }
+
+        .details-content {
+            color: #d0d0e0;
+            line-height: 1.6;
+            text-align: center;
+        }
+
         /* Адаптивность */
+        @media (max-width: 850px) {
+            .content {
+                padding: 15px;
+            }
+            
+            .project-main-card {
+                max-width: 100%;
+            }
+            
+            .project-image-container {
+                padding: 20px;
+            }
+            
+            .project-image {
+                max-height: 300px;
+            }
+            
+            .project-content {
+                padding: 25px;
+            }
+            
+            .project-title {
+                font-size: 2rem;
+            }
+            
+            .project-description {
+                font-size: 1.1rem;
+            }
+        }
+
         @media (max-width: 768px) {
             .title {
                 font-size: 2.5rem;
             }
             
-            .projects-grid {
-                padding: 0 15px;
-            }
-            
-            .project-card {
-                max-width: 100%;
-            }
-            
-            .project-image {
-                height: 220px;
-                padding: 15px;
-            }
-            
-            .project-content {
-                padding: 20px;
-            }
-            
-            .project-title {
-                font-size: 1.6rem;
-            }
-            
-            .project-description {
-                font-size: 1rem;
-            }
-            
             .project-buttons {
                 flex-direction: column;
-                gap: 10px;
+                align-items: center;
+                gap: 15px;
             }
             
             .project-btn {
-                min-width: 100%;
-                padding: 12px;
+                min-width: 80%;
+                padding: 12px 30px;
+            }
+            
+            .project-details {
+                margin-top: 30px;
+                padding: 20px;
             }
         }
 
@@ -360,17 +390,35 @@
                 font-size: 0.9rem;
             }
             
+            .project-image-container {
+                padding: 15px;
+            }
+            
             .project-image {
-                height: 180px;
-                padding: 10px;
+                max-height: 250px;
             }
             
             .project-title {
-                font-size: 1.4rem;
+                font-size: 1.8rem;
             }
             
             .project-description {
-                font-size: 0.95rem;
+                font-size: 1rem;
+                padding: 0;
+            }
+            
+            .project-content {
+                padding: 20px;
+            }
+            
+            .project-btn {
+                min-width: 90%;
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+            
+            .details-title {
+                font-size: 1.3rem;
             }
         }
     </style>
@@ -389,35 +437,34 @@
             <div class="subtitle" id="random-subtitle">#IuseProsAndArchAndKripOSbtw</div>
         </div>
 
-        <div class="projects-grid">
-            <!-- Проект 1 -->
-            <div class="project-card">
-                <img src="image_d1.png" alt="Project 1" class="project-image">
+        <div class="project-container">
+            <div class="project-main-card">
+                <div class="project-image-container">
+                    <img src="image_d1.png" alt="Project Image" class="project-image" id="main-project-image">
+                </div>
+                
                 <div class="project-content">
-                    <div class="project-title" id="project1-title">CherechnyaMod GTAG</div>
-                    <div class="project-description" id="project1-desc">
-                        This is my mod menu for gotilla tag, based on malachi temp
+                    <div class="project-title" id="project-title">#ProjectName</div>
+                    <div class="project-description" id="project-description">
+                        Здесь будет подробное описание проекта. Этот проект представляет собой нечто удивительное и инновационное. 
+                        Он создан с использованием современных технологий и обладает уникальными особенностями, которые выделяют его среди других.
+                        <br><br>
+                        Проект был разработан с целью решения конкретных задач и предоставляет пользователям удобный интерфейс и мощный функционал.
                     </div>
+                    
                     <div class="project-buttons">
-                        <a href="#" class="project-btn">Source Code</a>
-                        <a href="#" class="project-btn">View</a>
+                        <a href="https://github.com/username/project" target="_blank" class="project-btn" id="source-code-btn">Source Code</a>
+                        <a href="https://project-demo.com" target="_blank" class="project-btn" id="view-btn">View</a>
                     </div>
                 </div>
             </div>
 
-            <!-- Проект 2 -->
-            <div class="project-card">
-                <img src="image_d2.png" alt="Project 2" class="project-image">
-                <div class="project-content">
-                    <div class="project-title" id="project2-title">#ProjectName2</div>
-                    <div class="project-description" id="project2-desc">
-                        This is a description of the second project. It represents a breakthrough in its field 
-                        with unique capabilities and user-friendly design. Perfect for both beginners and experts.
-                    </div>
-                    <div class="project-buttons">
-                        <a href="#" class="project-btn">Source Code</a>
-                        <a href="#" class="project-btn">View</a>
-                    </div>
+            <!-- Дополнительная секция (опционально) -->
+            <div class="project-details" id="additional-details">
+                <div class="details-title">Дополнительная информация</div>
+                <div class="details-content" id="details-content">
+                    Здесь можно добавить дополнительную информацию о проекте: технологии, используемые инструменты,
+                    особенности реализации, или другую релевантную информацию.
                 </div>
             </div>
         </div>
@@ -486,36 +533,62 @@
         
         createStars();
         
-        // Функции для обновления контента проектов (вы можете их вызвать из консоли)
-        window.updateProject1 = function(title, description, sourceLink, viewLink) {
-            if (title) document.getElementById('project1-title').textContent = title;
-            if (description) document.getElementById('project1-desc').textContent = description;
-            if (sourceLink) document.querySelectorAll('.project-buttons')[0].children[0].href = sourceLink;
-            if (viewLink) document.querySelectorAll('.project-buttons')[0].children[1].href = viewLink;
+        // Функции для настройки проекта
+        window.configureProject = function(config) {
+            // Настройка основных параметров
+            if (config.title) {
+                document.getElementById('project-title').textContent = config.title;
+                document.title = config.title + ' - Kriperovich';
+            }
+            
+            if (config.description) {
+                document.getElementById('project-description').textContent = config.description;
+            }
+            
+            if (config.image) {
+                document.getElementById('main-project-image').src = config.image;
+            }
+            
+            if (config.sourceCodeLink) {
+                document.getElementById('source-code-btn').href = config.sourceCodeLink;
+            }
+            
+            if (config.viewLink) {
+                document.getElementById('view-btn').href = config.viewLink;
+            }
+            
+            // Дополнительные детали (опционально)
+            if (config.additionalDetails) {
+                document.getElementById('details-content').textContent = config.additionalDetails;
+            } else {
+                // Скрыть блок дополнительной информации если нет данных
+                document.getElementById('additional-details').style.display = 'none';
+            }
+            
+            // Дополнительное изображение (опционально)
+            if (config.secondImage) {
+                // Можно добавить второе изображение
+                const imageContainer = document.querySelector('.project-image-container');
+                const secondImg = document.createElement('img');
+                secondImg.src = config.secondImage;
+                secondImg.className = 'project-image';
+                secondImg.style.marginTop = '20px';
+                secondImg.alt = 'Additional Project Image';
+                imageContainer.appendChild(secondImg);
+            }
         };
         
-        window.updateProject2 = function(title, description, sourceLink, viewLink) {
-            if (title) document.getElementById('project2-title').textContent = title;
-            if (description) document.getElementById('project2-desc').textContent = description;
-            if (sourceLink) document.querySelectorAll('.project-buttons')[1].children[0].href = sourceLink;
-            if (viewLink) document.querySelectorAll('.project-buttons')[1].children[1].href = viewLink;
-        };
-        
-        // Пример использования (раскомментируйте для теста):
+        // Пример конфигурации (раскомментировать и настроить)
         /*
-        updateProject1(
-            "#MyAwesomeProject", 
-            "This is an amazing project that does incredible things with cutting-edge technology.",
-            "https://github.com/yourusername/project1",
-            "https://yourproject1.demo"
-        );
-        
-        updateProject2(
-            "#AnotherProject", 
-            "Another fantastic project with innovative features and great user experience.",
-            "https://github.com/yourusername/project2",
-            "https://yourproject2.demo"
-        );
+        configureProject({
+            title: "#MyAwesomeProject",
+            description: "Это потрясающий проект, который изменит ваше представление о возможностях программирования. Создан с любовью и вниманием к деталям.",
+            image: "image_d1.png",
+            sourceCodeLink: "https://github.com/yourusername/project",
+            viewLink: "https://project-demo.com",
+            additionalDetails: "Используемые технологии: React, Node.js, MongoDB. Проект поддерживает все современные браузеры и имеет мобильную версию.",
+            secondImage: "image_d2.png" // опционально
+        });
         */
     </script>
 </body>
