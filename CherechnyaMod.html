@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kriperovich Projects</title>
+    <!-- Добавляем favicon -->
+    <link rel="icon" type="image/png" href="iconsite.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #0c0b1a 0%, #1a0b2e 30%, #2d0b3e 70%, #3d0b4e 100%);
+        }
+
+        /* Космический фиолетовый фон со звёздами */
+        .space-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        /* Туманности */
+        .nebula {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+            mix-blend-mode: screen;
+        }
+
+        .nebula-1 {
+            top: 10%;
+            left: 5%;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, #8a2be2, transparent 70%);
+            animation: float 25s infinite ease-in-out;
+        }
+
+        .nebula-2 {
+            bottom: 15%;
+            right: 10%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #9370db, transparent 70%);
+            animation: float 30s infinite ease-in-out reverse;
+        }
+
+        .nebula-3 {
+            top: 50%;
+            left: 20%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, #ba55d3, transparent 70%);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        /* Анимации */
+        @keyframes twinkle {
+            0% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0.2; transform: scale(1); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, 30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        /* Контент */
+        .content {
+            position: relative;
+            z-index: 2;
+            padding: 20px;
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Заголовок */
+        .main-header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-top: 40px;
+            width: 100%;
+        }
+
+        .title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #8a2be2, #9370db, #ba55d3);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .title:hover {
+            transform: translateY(-3px);
+            text-shadow: 0 0 30px rgba(138, 43, 226, 0.7);
+        }
+
+        .title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #8a2be2, transparent);
+            border-radius: 2px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #d0b3ff;
+            font-style: italic;
+            height: 24px;
+            opacity: 0.9;
+            transition: opacity 0.5s ease;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+        }
+
+        /* Сетка проектов */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 40px;
+            padding: 20px 0;
+            width: 100%;
+            justify-items: center;
+        }
+
+        @media (max-width: 1100px) {
+            .projects-grid {
+                grid-template-columns: 1fr;
+                max-width: 800px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+
+        /* Карточка проекта */
+        .project-card {
+            background: linear-gradient(145deg, rgba(42, 42, 62, 0.85), rgba(37, 37, 54, 0.9));
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3),
+                        inset 0 0 30px rgba(138, 43, 226, 0.1);
+            position: relative;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .project-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(138, 43, 226, 0.25),
+                        inset 0 0 40px rgba(138, 43, 226, 0.18);
+            border-color: #8a2be2;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8a2be2, #9370db, #ba55d3);
+            border-radius: 20px 20px 0 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .project-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Изображение проекта */
+        .project-image {
+            width: 100%;
+            height: 280px;
+            object-fit: contain;
+            display: block;
+            background: rgba(30, 30, 46, 0.5);
+            padding: 20px;
+            border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+            transition: transform 0.4s ease;
+        }
+
+        .project-card:hover .project-image {
+            transform: scale(1.02);
+        }
+
+        /* Контент проекта */
+        .project-content {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .project-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(138, 43, 226, 0.4);
+        }
+
+        .project-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #d0d0e0;
+            margin-bottom: 25px;
+            text-align: center;
+            flex: 1;
+        }
+
+        /* Кнопки проекта */
+        .project-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            padding-top: 15px;
+            border-top: 1px solid rgba(138, 43, 226, 0.2);
+        }
+
+        .project-btn {
+            padding: 12px 30px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.35), rgba(147, 112, 219, 0.35));
+            border: 1px solid rgba(138, 43, 226, 0.45);
+            border-radius: 12px;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            min-width: 140px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .project-btn:hover {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.55), rgba(147, 112, 219, 0.55));
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(138, 43, 226, 0.35);
+            border-color: rgba(138, 43, 226, 0.7);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .projects-grid {
+                padding: 0 15px;
+            }
+            
+            .project-card {
+                max-width: 100%;
+            }
+            
+            .project-image {
+                height: 220px;
+                padding: 15px;
+            }
+            
+            .project-content {
+                padding: 20px;
+            }
+            
+            .project-title {
+                font-size: 1.6rem;
+            }
+            
+            .project-description {
+                font-size: 1rem;
+            }
+            
+            .project-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .project-btn {
+                min-width: 100%;
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .project-image {
+                height: 180px;
+                padding: 10px;
+            }
+            
+            .project-title {
+                font-size: 1.4rem;
+            }
+            
+            .project-description {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="space-background">
+        <div class="stars" id="stars-container"></div>
+        <div class="nebula nebula-1"></div>
+        <div class="nebula nebula-2"></div>
+        <div class="nebula nebula-3"></div>
+    </div>
+
+    <div class="content">
+        <div class="main-header">
+            <a href="https://kriperovich.github.io" target="_blank" class="title">Kriperovich</a>
+            <div class="subtitle" id="random-subtitle">#IuseProsAndArchAndKripOSbtw</div>
+        </div>
+
+        <div class="projects-grid">
+            <!-- Проект 1 -->
+            <div class="project-card">
+                <img src="image_d1.png" alt="Project 1" class="project-image">
+                <div class="project-content">
+                    <div class="project-title" id="project1-title">CherechnyaMod GTAG</div>
+                    <div class="project-description" id="project1-desc">
+                        This is my mod menu for gotilla tag, based on malachi temp
+                    </div>
+                    <div class="project-buttons">
+                        <a href="#" class="project-btn">Source Code</a>
+                        <a href="#" class="project-btn">View</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Проект 2 -->
+            <div class="project-card">
+                <img src="image_d2.png" alt="Project 2" class="project-image">
+                <div class="project-content">
+                    <div class="project-title" id="project2-title">#ProjectName2</div>
+                    <div class="project-description" id="project2-desc">
+                        This is a description of the second project. It represents a breakthrough in its field 
+                        with unique capabilities and user-friendly design. Perfect for both beginners and experts.
+                    </div>
+                    <div class="project-buttons">
+                        <a href="#" class="project-btn">Source Code</a>
+                        <a href="#" class="project-btn">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Рандомные подзаголовки
+        const subtitles = [
+            "#IuseProsAndArchAndKripOSbtw",
+            "Boom boom boom, i want you in my room",
+            "я гей кстати",
+            "Creating awesome projects since forever",
+            "Code > Sleep",
+            "404: Sleep Not Found",
+            "sudo make me a sandwich",
+            "Hello, World!",
+            "git commit -m 'Initial commit'",
+            "There's no place like 127.0.0.1"
+        ];
+        
+        const subtitleElement = document.getElementById('random-subtitle');
+        
+        function getRandomSubtitle() {
+            const randomIndex = Math.floor(Math.random() * subtitles.length);
+            return subtitles[randomIndex];
+        }
+        
+        function animateSubtitle() {
+            subtitleElement.style.opacity = '0';
+            
+            setTimeout(() => {
+                subtitleElement.textContent = getRandomSubtitle();
+                subtitleElement.style.opacity = '0.9';
+            }, 500);
+        }
+        
+        subtitleElement.textContent = getRandomSubtitle();
+        setInterval(animateSubtitle, 3000);
+        subtitleElement.addEventListener('click', animateSubtitle);
+        
+        // Создание звёзд
+        function createStars() {
+            const starsContainer = document.getElementById('stars-container');
+            const starCount = 150;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                const size = Math.random() * 3 + 1;
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const delay = Math.random() * 3;
+                const duration = Math.random() * 2 + 2;
+                
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${x}%`;
+                star.style.top = `${y}%`;
+                star.style.animationDelay = `${delay}s`;
+                star.style.animationDuration = `${duration}s`;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        createStars();
+        
+        // Функции для обновления контента проектов (вы можете их вызвать из консоли)
+        window.updateProject1 = function(title, description, sourceLink, viewLink) {
+            if (title) document.getElementById('project1-title').textContent = title;
+            if (description) document.getElementById('project1-desc').textContent = description;
+            if (sourceLink) document.querySelectorAll('.project-buttons')[0].children[0].href = sourceLink;
+            if (viewLink) document.querySelectorAll('.project-buttons')[0].children[1].href = viewLink;
+        };
+        
+        window.updateProject2 = function(title, description, sourceLink, viewLink) {
+            if (title) document.getElementById('project2-title').textContent = title;
+            if (description) document.getElementById('project2-desc').textContent = description;
+            if (sourceLink) document.querySelectorAll('.project-buttons')[1].children[0].href = sourceLink;
+            if (viewLink) document.querySelectorAll('.project-buttons')[1].children[1].href = viewLink;
+        };
+        
+        // Пример использования (раскомментируйте для теста):
+        /*
+        updateProject1(
+            "#MyAwesomeProject", 
+            "This is an amazing project that does incredible things with cutting-edge technology.",
+            "https://github.com/yourusername/project1",
+            "https://yourproject1.demo"
+        );
+        
+        updateProject2(
+            "#AnotherProject", 
+            "Another fantastic project with innovative features and great user experience.",
+            "https://github.com/yourusername/project2",
+            "https://yourproject2.demo"
+        );
+        */
+    </script>
+</body>
+</html>
