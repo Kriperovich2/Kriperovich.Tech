@@ -35,6 +35,57 @@
             background: linear-gradient(135deg, #0c0b1a 0%, #1a0b2e 30%, #2d0b3e 70%, #3d0b4e 100%);
         }
 
+        /* Кнопки социальных сетей - НОВОЕ */
+        .social-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .social-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #ffffff;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            border: 1.5px solid rgba(138, 43, 226, 0.4);
+        }
+
+        .social-btn:hover {
+            transform: translateY(-4px) scale(1.08);
+            box-shadow: 0 10px 25px rgba(138, 43, 226, 0.4);
+            border-color: rgba(138, 43, 226, 0.7);
+        }
+
+        .youtube-btn {
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(200, 0, 0, 0.3));
+        }
+
+        .youtube-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.4), rgba(200, 0, 0, 0.5));
+            color: #ff0000;
+        }
+
+        .tiktok-btn {
+            background: linear-gradient(135deg, rgba(0, 192, 116, 0.25), rgba(0, 160, 96, 0.35));
+        }
+
+        .tiktok-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 192, 116, 0.45), rgba(0, 160, 96, 0.55));
+            color: #00c074;
+        }
+
         /* Звёзды с возможностью соединения */
         .stars {
             position: absolute;
@@ -391,6 +442,19 @@
                 min-width: 110px;
                 font-size: 0.9rem;
             }
+
+            /* Адаптация кнопок соцсетей для мобильных */
+            .social-buttons {
+                top: 15px;
+                right: 15px;
+                gap: 10px;
+            }
+
+            .social-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.2rem;
+            }
         }
 
         /* Responsive adjustments */
@@ -497,6 +561,16 @@
         <div class="nebula nebula-1"></div>
         <div class="nebula nebula-2"></div>
         <div class="nebula nebula-3"></div>
+    </div>
+
+    <!-- Кнопки социальных сетей - НОВОЕ -->
+    <div class="social-buttons">
+        <a href="https://www.youtube.com/@just_kriperovich" target="_blank" class="social-btn youtube-btn" title="YouTube">
+            📺
+        </a>
+        <a href="https://www.tiktok.com/@kriperovich07" target="_blank" class="social-btn tiktok-btn" title="TikTok">
+            🎵
+        </a>
     </div>
 
     <div class="content">
