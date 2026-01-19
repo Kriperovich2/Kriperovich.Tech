@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KripClient - Gorilla Tag Mod</title>
+    <!-- Добавляем favicon -->
+    <link rel="icon" type="image/png" href="iconsite.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #0a0f2a 0%, #0b1a3e 30%, #0d2e5e 70%, #0e4a8e 100%);
+        }
+
+        /* Космический синий фон со звёздами */
+        .space-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        /* Туманности - синие */
+        .nebula {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+            mix-blend-mode: screen;
+        }
+
+        .nebula-1 {
+            top: 10%;
+            left: 5%;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, #0066ff, transparent 70%);
+            animation: float 25s infinite ease-in-out;
+        }
+
+        .nebula-2 {
+            bottom: 15%;
+            right: 10%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #0088ff, transparent 70%);
+            animation: float 30s infinite ease-in-out reverse;
+        }
+
+        .nebula-3 {
+            top: 50%;
+            left: 20%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, #00aaff, transparent 70%);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        /* Анимации */
+        @keyframes twinkle {
+            0% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0.2; transform: scale(1); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, 30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        /* Контент */
+        .content {
+            position: relative;
+            z-index: 2;
+            padding: 20px;
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Заголовок */
+        .main-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 40px;
+            width: 100%;
+        }
+
+        .title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #0066ff, #0088ff, #00aaff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(0, 102, 255, 0.4);
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .title:hover {
+            transform: translateY(-3px);
+            text-shadow: 0 0 30px rgba(0, 102, 255, 0.6);
+        }
+
+        .title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #0066ff, transparent);
+            border-radius: 2px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #a0d0ff;
+            font-style: italic;
+            height: 24px;
+            opacity: 0.9;
+            transition: opacity 0.5s ease;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0, 102, 255, 0.3);
+        }
+
+        /* Основная карточка проекта */
+        .project-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .project-main-card {
+            background: linear-gradient(145deg, rgba(20, 35, 65, 0.85), rgba(15, 30, 60, 0.9));
+            border-radius: 25px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0, 102, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4),
+                        inset 0 0 35px rgba(0, 102, 255, 0.1);
+            position: relative;
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .project-main-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 102, 255, 0.25),
+                        inset 0 0 50px rgba(0, 102, 255, 0.15);
+            border-color: #0066ff;
+        }
+
+        .project-main-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #0066ff, #0088ff, #00aaff);
+            border-radius: 25px 25px 0 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .project-main-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Изображение проекта */
+        .project-image-container {
+            width: 100%;
+            padding: 30px;
+            background: rgba(15, 25, 45, 0.6);
+            border-bottom: 1px solid rgba(0, 102, 255, 0.25);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .project-image {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s ease;
+            border: 1px solid rgba(0, 102, 255, 0.2);
+        }
+
+        .project-main-card:hover .project-image {
+            transform: scale(1.02);
+            box-shadow: 0 12px 30px rgba(0, 102, 255, 0.3);
+        }
+
+        /* Контент проекта */
+        .project-content {
+            padding: 35px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .project-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(0, 102, 255, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .project-description {
+            font-size: 1.2rem;
+            line-height: 1.7;
+            color: #d0e0ff;
+            margin-bottom: 35px;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .project-description a {
+            color: #00aaff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
+        }
+
+        .project-description a:hover {
+            color: #00ccff;
+            text-shadow: 0 0 15px rgba(0, 204, 255, 0.5);
+            text-decoration: underline;
+        }
+
+        /* Кнопки проекта */
+        .project-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            padding-top: 25px;
+            border-top: 1px solid rgba(0, 102, 255, 0.25);
+            flex-wrap: wrap;
+        }
+
+        .project-btn {
+            padding: 14px 35px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.25), rgba(0, 136, 255, 0.25));
+            border: 1px solid rgba(0, 102, 255, 0.35);
+            border-radius: 12px;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            min-width: 160px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .project-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.4), rgba(0, 136, 255, 0.4));
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 12px 25px rgba(0, 102, 255, 0.3);
+            border-color: rgba(0, 102, 255, 0.6);
+        }
+
+        /* Дополнительная информация */
+        .project-details {
+            margin-top: 40px;
+            width: 100%;
+            max-width: 800px;
+            padding: 25px;
+            background: rgba(20, 35, 65, 0.7);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 102, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .details-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0, 102, 255, 0.3);
+        }
+
+        .details-content {
+            color: #d0e0ff;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 850px) {
+            .content {
+                padding: 15px;
+            }
+            
+            .project-main-card {
+                max-width: 100%;
+            }
+            
+            .project-image-container {
+                padding: 20px;
+            }
+            
+            .project-image {
+                max-height: 300px;
+            }
+            
+            .project-content {
+                padding: 25px;
+            }
+            
+            .project-title {
+                font-size: 2rem;
+            }
+            
+            .project-description {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .project-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            
+            .project-btn {
+                min-width: 80%;
+                padding: 12px 30px;
+            }
+            
+            .project-details {
+                margin-top: 30px;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .project-image-container {
+                padding: 15px;
+            }
+            
+            .project-image {
+                max-height: 250px;
+            }
+            
+            .project-title {
+                font-size: 1.8rem;
+            }
+            
+            .project-description {
+                font-size: 1rem;
+                padding: 0;
+            }
+            
+            .project-content {
+                padding: 20px;
+            }
+            
+            .project-btn {
+                min-width: 90%;
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+            
+            .details-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="space-background">
+        <div class="stars" id="stars-container"></div>
+        <div class="nebula nebula-1"></div>
+        <div class="nebula nebula-2"></div>
+        <div class="nebula nebula-3"></div>
+    </div>
+
+    <div class="content">
+        <div class="main-header">
+            <a href="https://kriperovich.tech" target="_blank" class="title">Kriperovich</a>
+            <div class="subtitle" id="random-subtitle">#IuseProsAndArchAndKripOSbtw</div>
+        </div>
+
+        <div class="project-container">
+            <div class="project-main-card">
+                <div class="project-image-container">
+                    <img src="image_CH1.png" alt="KripClient Project Image" class="project-image" id="main-project-image">
+                </div>
+                
+                <div class="project-content">
+                    <div class="project-title" id="project-title">KripClient for Gorilla Tag</div>
+                    <div class="project-description" id="project-description">
+                        A powerful and feature-rich client modification for Gorilla Tag, based on <a href="https://discord.gg/6YCmtJkBBx">Malachi Temp</a>.
+                        <br><br>
+                        Experience enhanced gameplay with custom features, optimizations, and utilities.
+                    </div>
+                    
+                    <div class="project-buttons">
+                        <a href="https://github.com/Kriperovich2/KripClient" target="_blank" class="project-btn" id="source-code-btn">Source Code</a>
+                        <a href="https://github.com/Kriperovich2/KripClient/releases" target="_blank" class="project-btn" id="view-btn">Download</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Дополнительная секция -->
+            <div class="project-details" id="additional-details">
+                <div class="details-title">About KripClient</div>
+                <div class="details-content" id="details-content">
+                    KripClient is a custom Gorilla Tag mod featuring performance optimizations, 
+                    quality-of-life improvements, and unique gameplay enhancements. 
+                    Built with stability and user experience in mind.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Рандомные подзаголовки
+        const subtitles = [
+            "#IuseProsAndArchAndKripOSbtw",
+            "KripClient - Enhanced Gorilla Tag Experience",
+            "Powered by blue energy",
+            "Creating awesome projects since forever",
+            "Code > Sleep",
+            "404: Sleep Not Found",
+            "sudo make me a sandwich",
+            "Hello, World!",
+            "git commit -m 'Initial commit'",
+            "There's no place like 127.0.0.1",
+            "Blue Theme Active",
+            "KripClient v1.0.0"
+        ];
+        
+        const subtitleElement = document.getElementById('random-subtitle');
+        
+        function getRandomSubtitle() {
+            const randomIndex = Math.floor(Math.random() * subtitles.length);
+            return subtitles[randomIndex];
+        }
+        
+        function animateSubtitle() {
+            subtitleElement.style.opacity = '0';
+            
+            setTimeout(() => {
+                subtitleElement.textContent = getRandomSubtitle();
+                subtitleElement.style.opacity = '0.9';
+            }, 500);
+        }
+        
+        subtitleElement.textContent = getRandomSubtitle();
+        setInterval(animateSubtitle, 3000);
+        subtitleElement.addEventListener('click', animateSubtitle);
+        
+        // Создание звёзд
+        function createStars() {
+            const starsContainer = document.getElementById('stars-container');
+            const starCount = 150;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                const size = Math.random() * 3 + 1;
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const delay = Math.random() * 3;
+                const duration = Math.random() * 2 + 2;
+                
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${x}%`;
+                star.style.top = `${y}%`;
+                star.style.animationDelay = `${delay}s`;
+                star.style.animationDuration = `${duration}s`;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        createStars();
+        
+        // Функции для настройки проекта
+        window.configureProject = function(config) {
+            // Настройка основных параметров
+            if (config.title) {
+                document.getElementById('project-title').textContent = config.title;
+                document.title = config.title + ' - Kriperovich';
+            }
+            
+            if (config.description) {
+                document.getElementById('project-description').textContent = config.description;
+            }
+            
+            if (config.image) {
+                document.getElementById('main-project-image').src = config.image;
+            }
+            
+            if (config.sourceCodeLink) {
+                document.getElementById('source-code-btn').href = config.sourceCodeLink;
+            }
+            
+            if (config.viewLink) {
+                document.getElementById('view-btn').href = config.viewLink;
+            }
+            
+            // Дополнительные детали
+            if (config.additionalDetails) {
+                document.getElementById('details-content').textContent = config.additionalDetails;
+            }
+            
+            // Дополнительное изображение (опционально)
+            if (config.secondImage) {
+                const imageContainer = document.querySelector('.project-image-container');
+                const secondImg = document.createElement('img');
+                secondImg.src = config.secondImage;
+                secondImg.className = 'project-image';
+                secondImg.style.marginTop = '20px';
+                secondImg.alt = 'Additional Project Image';
+                imageContainer.appendChild(secondImg);
+            }
+        };
+    </script>
+</body>
+</html>
