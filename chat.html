@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Анонимный мессенджер | GistDB</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0a0712;
+            color: #f0eaff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .screen {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background: #13101c;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .hidden { display: none !important; }
+        .header {
+            background: #2a1e42;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #3d2c5e;
+            flex-shrink: 0;
+        }
+        .header h2 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-icon {
+            background: none;
+            border: none;
+            color: #cbb9ff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+        .btn-icon:hover { background: #3d2c5e; }
+        .list-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        .item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #2a1e42;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-info {
+            flex: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #2a1e42;
+        }
+        .item-details {
+            flex: 1;
+        }
+        .item-title { font-weight: 500; margin-bottom: 4px; }
+        .item-sub { font-size: 0.75rem; color: #9b8bcb; }
+        .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .action-btn {
+            background: #3d2c5e;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .danger-btn { background: #8b3c3c; }
+        .search-bar {
+            padding: 8px 16px;
+            background: #1e1a2f;
+            border-bottom: 1px solid #2a1e42;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 10px;
+            background: #2a1e42;
+            border: none;
+            border-radius: 24px;
+            color: #f0eaff;
+            font-size: 1rem;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .message {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            word-wrap: break-word;
+        }
+        .message-own {
+            align-self: flex-end;
+            background: #6a1b9a;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .message-other {
+            align-self: flex-start;
+            background: #2a1e42;
+            border-bottom-left-radius: 4px;
+        }
+        .message-meta {
+            font-size: 0.65rem;
+            color: #b9a9ff;
+            margin-top: 4px;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .message-own .message-meta { color: #ddccff; }
+        .message-img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+        audio { max-width: 200px; border-radius: 20px; }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ff9e8f;
+            cursor: pointer;
+            font-size: 0.7rem;
+            margin-left: 8px;
+        }
+        .input-area {
+            background: #1e1a2f;
+            padding: 8px 12px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            border-top: 1px solid #2a1e42;
+            flex-shrink: 0;
+        }
+        .input-area input {
+            flex: 1;
+            background: #2a1e42;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 24px;
+            color: #f0eaff;
+            font-size: 1rem;
+            outline: none;
+        }
+        .input-area button {
+            background: #6a1b9a;
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-card {
+            background: #2a1e42;
+            width: 90%;
+            max-width: 360px;
+            border-radius: 24px;
+            padding: 20px;
+        }
+        .modal-card h3 { margin-bottom: 16px; }
+        .modal-card input, .modal-card textarea, .modal-card select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            background: #1e1a2f;
+            border: none;
+            border-radius: 12px;
+            color: white;
+        }
+        .modal-card button {
+            background: #6a1b9a;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 24px;
+            color: white;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 12px;
+            display: block;
+            background: #1e1a2f;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2a1e42;
+            color: #f0eaff;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            z-index: 1100;
+            pointer-events: none;
+        }
+        .loader { text-align: center; padding: 20px; color: #9b8bcb; }
+        .admin-badge {
+            background: #6a1b9a;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Экран логина -->
+<div id="loginScreen" class="screen">
+    <div class="header"><h2>🔐 Анонимный мессенджер</h2></div>
+    <div class="search-bar"><input type="text" id="searchAccounts" placeholder="🔍 Поиск аккаунтов..."></div>
+    <div class="list-container" id="accountsList"><div class="loader">Загрузка аккаунтов...</div></div>
+    <div style="padding: 16px; border-top: 1px solid #2a1e42;">
+        <input type="text" id="newAccName" placeholder="Новое имя" autocomplete="off">
+        <input type="password" id="newAccPass" placeholder="Пароль аккаунта">
+        <button id="createAccBtn" style="margin-top: 8px;">➕ Создать аккаунт</button>
+    </div>
+</div>
+
+<!-- Экран групп -->
+<div id="groupsScreen" class="screen hidden">
+    <div class="header">
+        <h2 id="groupsUserName">Группы</h2>
+        <div>
+            <button id="accountSettingsBtn" class="btn-icon" title="Настройки аккаунта">⚙️</button>
+            <button id="logoutBtn" class="btn-icon" title="Сменить аккаунт">🚪</button>
+        </div>
+    </div>
+    <div class="search-bar"><input type="text" id="searchGroups" placeholder="🔍 Поиск групп..."></div>
+    <div class="list-container" id="groupsList"><div class="loader">Загрузка групп...</div></div>
+    <div class="input-area" style="justify-content: space-evenly; gap: 8px;">
+        <button id="createGroupBtn" style="width: auto; padding: 0 16px; border-radius: 24px;">➕ Новая группа</button>
+        <button id="joinGroupBtn" style="width: auto; padding: 0 16px; border-radius: 24px;">🔗 Присоединиться по коду</button>
+    </div>
+</div>
+
+<!-- Экран чата -->
+<div id="chatScreen" class="screen hidden">
+    <div class="header">
+        <button id="backToGroupsBtn" class="btn-icon">←</button>
+        <h2 id="chatGroupTitle">Чат</h2>
+        <button id="showInviteBtn" class="btn-icon" title="Код приглашения">🔗</button>
+        <button id="groupSettingsBtn" class="btn-icon" title="Настройки группы">⚙️</button>
+    </div>
+    <div id="chatMessages" class="chat-messages"></div>
+    <div class="input-area">
+        <button id="attachImageBtn" title="Изображение">🖼️</button>
+        <button id="voiceRecordBtn" title="Голосовое">🎙️</button>
+        <input type="text" id="messageInput" placeholder="Сообщение" autocomplete="off">
+        <button id="sendTextBtn">➤</button>
+    </div>
+</div>
+
+<script>
+    const GITHUB_TOKEN = "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";
+    const MAIN_GIST_ID = "746f99bb5a18eb2531e7c954e22b78ba";
+    const ADMIN_NAME = "1"; // глобальный администратор
+
+    let currentUser = null;
+    let currentGroup = null;
+    let allGroups = [];
+    let messages = [];
+    let pollInterval = null;
+    let activeGroupPassword = null;
+
+    function showToast(msg, isError = false) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        if(isError) toast.style.background = '#8b3c3c';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    async function apiRequest(url, method = 'GET', body = null) {
+        if(!GITHUB_TOKEN) throw new Error('Укажите GITHUB_TOKEN');
+        const headers = { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' };
+        if(body) headers['Content-Type'] = 'application/json';
+        const ts = Date.now();
+        const finalUrl = url + (url.includes('?') ? '&' : '?') + `ts=${ts}`;
+        const res = await fetch(finalUrl, { method, headers, body: body ? JSON.stringify(body) : undefined });
+        if(!res.ok) throw new Error(`Gist API error ${res.status}`);
+        return await res.json();
+    }
+
+    async function getMainGist() {
+        const data = await apiRequest(`https://api.github.com/gists/${MAIN_GIST_ID}`);
+        const content = data.files['main.json']?.content || '{"accounts":[],"groups":[]}';
+        return JSON.parse(content);
+    }
+
+    async function updateMainGist(contentObj) {
+        const payload = { files: { 'main.json': { content: JSON.stringify(contentObj, null, 2) } } };
+        await apiRequest(`https://api.github.com/gists/${MAIN_GIST_ID}`, 'PATCH', payload);
+    }
+
+    async function getGroupMessagesRaw(gistId) {
+        const data = await apiRequest(`https://api.github.com/gists/${gistId}`);
+        const content = data.files['messages.json']?.content || '[]';
+        return JSON.parse(content);
+    }
+
+    async function updateGroupMessages(gistId, encryptedMessagesArray) {
+        const payload = { files: { 'messages.json': { content: JSON.stringify(encryptedMessagesArray, null, 2) } } };
+        await apiRequest(`https://api.github.com/gists/${gistId}`, 'PATCH', payload);
+    }
+
+    async function createNewGroupGist(initialMessages = []) {
+        const payload = { description: "Group messages", public: false, files: { 'messages.json': { content: JSON.stringify(initialMessages) } } };
+        const gist = await apiRequest('https://api.github.com/gists', 'POST', payload);
+        return gist.id;
+    }
+
+    async function deleteGist(gistId) {
+        await fetch(`https://api.github.com/gists/${gistId}`, { method: 'DELETE', headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
+    }
+
+    function encryptMessageObj(msgObj, password) {
+        return CryptoJS.AES.encrypt(JSON.stringify(msgObj), password).toString();
+    }
+
+    function decryptMessageObj(encryptedStr, password) {
+        try {
+            const bytes = CryptoJS.AES.decrypt(encryptedStr, password);
+            const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+            if(!decrypted) throw new Error();
+            return JSON.parse(decrypted);
+        } catch(e) { throw new Error('Неверный пароль группы'); }
+    }
+
+    function hashPassword(pass) { return CryptoJS.SHA256(pass).toString(); }
+
+    function generateInviteCode(gistId, groupPassword) {
+        const raw = `${gistId}:${groupPassword}`;
+        return btoa(unescape(encodeURIComponent(raw)));
+    }
+
+    function parseInviteCode(code) {
+        try {
+            const decoded = decodeURIComponent(escape(atob(code)));
+            const [gistId, password] = decoded.split(':');
+            if(!gistId || !password) throw new Error();
+            return { gistId, password };
+        } catch(e) { throw new Error('Неверный код приглашения'); }
+    }
+
+    function defaultAvatar(name, type = 'account') {
+        const canvas = document.createElement('canvas');
+        canvas.width = 100;
+        canvas.height = 100;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = type === 'account' ? '#6a1b9a' : '#3d2c5e';
+        ctx.fillRect(0, 0, 100, 100);
+        ctx.fillStyle = '#fff';
+        ctx.font = '48px sans-serif';
+        ctx.fillText(name.charAt(0).toUpperCase(), 30, 70);
+        return canvas.toDataURL();
+    }
+
+    // Аккаунты
+    async function loadAccounts() {
+        const main = await getMainGist();
+        return main.accounts || [];
+    }
+
+    async function createAccount(name, password, avatar = null) {
+        const main = await getMainGist();
+        const accounts = main.accounts || [];
+        if(accounts.find(a => a.name === name)) throw new Error('Имя уже существует');
+        accounts.push({
+            name,
+            passwordHash: hashPassword(password),
+            avatar: avatar || defaultAvatar(name, 'account')
+        });
+        main.accounts = accounts;
+        await updateMainGist(main);
+        return true;
+    }
+
+    async function loginAccount(name, password) {
+        const main = await getMainGist();
+        const acc = main.accounts.find(a => a.name === name);
+        if(!acc) throw new Error('Аккаунт не найден');
+        if(acc.passwordHash !== hashPassword(password)) throw new Error('Неверный пароль');
+        currentUser = { name, passwordHash: acc.passwordHash, avatar: acc.avatar };
+        allGroups = main.groups || [];
+        return allGroups;
+    }
+
+    async function updateAccount(name, updates) {
+        const main = await getMainGist();
+        const accounts = main.accounts;
+        const index = accounts.findIndex(a => a.name === name);
+        if(index === -1) throw new Error('Аккаунт не найден');
+        accounts[index] = { ...accounts[index], ...updates };
+        main.accounts = accounts;
+        await updateMainGist(main);
+        if(currentUser && currentUser.name === name) {
+            currentUser = { ...currentUser, ...updates };
+        }
+    }
+
+    async function deleteAccount(name, password) {
+        const main = await getMainGist();
+        const acc = main.accounts.find(a => a.name === name);
+        if(!acc) throw new Error('Аккаунт не найден');
+        
+        const isAdmin = currentUser && currentUser.name === ADMIN_NAME;
+        if (!isAdmin && acc.passwordHash !== hashPassword(password)) {
+            throw new Error('Неверный пароль');
+        }
+        
+        // Удаляем пользователя из всех групп
+        const groups = main.groups || [];
+        for(const group of groups) {
+            if(group.participants.includes(name)) {
+                group.participants = group.participants.filter(p => p !== name);
+            }
+        }
+        main.groups = groups;
+        main.accounts = main.accounts.filter(a => a.name !== name);
+        await updateMainGist(main);
+    }
+
+    // Группы
+    async function createNewGroup(name, groupPassword, avatar = null, description = '') {
+        const gistId = await createNewGroupGist([]);
+        const main = await getMainGist();
+        const groups = main.groups || [];
+        const newGroup = {
+            id: Date.now().toString(),
+            name,
+            gistId,
+            participants: [currentUser.name],
+            creator: currentUser.name,
+            avatar: avatar || defaultAvatar(name, 'group'),
+            description
+        };
+        groups.push(newGroup);
+        main.groups = groups;
+        await updateMainGist(main);
+        const inviteCode = generateInviteCode(gistId, groupPassword);
+        return { group: newGroup, inviteCode };
+    }
+
+    async function deleteGroup(groupId, gistId) {
+        const main = await getMainGist();
+        const groups = main.groups || [];
+        const group = groups.find(g => g.id === groupId);
+        if(!group) throw new Error('Группа не найдена');
+        // Проверка прав: либо создатель, либо глобальный админ
+        if (group.creator !== currentUser.name && currentUser.name !== ADMIN_NAME) {
+            throw new Error('Только создатель или администратор может удалить группу');
+        }
+        // Удаляем gist
+        await deleteGist(gistId);
+        main.groups = groups.filter(g => g.id !== groupId);
+        await updateMainGist(main);
+    }
+
+    async function updateGroupMetadata(groupId, updates) {
+        const main = await getMainGist();
+        const groups = main.groups || [];
+        const index = groups.findIndex(g => g.id === groupId);
+        if(index === -1) throw new Error('Группа не найдена');
+        // Проверка прав: либо создатель, либо глобальный админ
+        if (groups[index].creator !== currentUser.name && currentUser.name !== ADMIN_NAME) {
+            throw new Error('Только создатель или администратор может изменять настройки группы');
+        }
+        groups[index] = { ...groups[index], ...updates };
+        main.groups = groups;
+        await updateMainGist(main);
+        if(currentGroup && currentGroup.id === groupId) {
+            currentGroup = { ...currentGroup, ...updates };
+            document.getElementById('chatGroupTitle').innerHTML = `<img class="avatar" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;" src="${currentGroup.avatar}"> ${escapeHtml(currentGroup.name)}`;
+        }
+    }
+
+    async function joinGroupByCode(inviteCode) {
+        const { gistId, password } = parseInviteCode(inviteCode);
+        // Проверяем доступ
+        const rawMsgs = await getGroupMessagesRaw(gistId);
+        if(rawMsgs.length > 0) decryptMessageObj(rawMsgs[0], password);
+        const main = await getMainGist();
+        let group = main.groups.find(g => g.gistId === gistId);
+        if(!group) {
+            const groupName = prompt('Введите название группы:', 'Новая группа');
+            if(!groupName) throw new Error('Название обязательно');
+            group = {
+                id: Date.now().toString(),
+                name: groupName,
+                gistId,
+                participants: [currentUser.name],
+                creator: null,
+                avatar: defaultAvatar(groupName, 'group'),
+                description: ''
+            };
+            main.groups.push(group);
+        } else {
+            if(!group.participants.includes(currentUser.name)) {
+                group.participants.push(currentUser.name);
+            }
+        }
+        await updateMainGist(main);
+        return { group, password };
+    }
+
+    // Сообщения
+    async function loadAndDecryptMessages(gistId, groupPassword) {
+        const encryptedMsgs = await getGroupMessagesRaw(gistId);
+        const decrypted = [];
+        for(const enc of encryptedMsgs) {
+            try {
+                decrypted.push(decryptMessageObj(enc, groupPassword));
+            } catch(e) {
+                decrypted.push({ id: 'error', error: true, content: '[Не удалось расшифровать]' });
+            }
+        }
+        return decrypted.sort((a,b) => (a.timestamp || 0) - (b.timestamp || 0));
+    }
+
+    async function sendNewMessage(groupGistId, groupPassword, msgObj) {
+        const encryptedMsgs = await getGroupMessagesRaw(groupGistId);
+        encryptedMsgs.push(encryptMessageObj(msgObj, groupPassword));
+        await updateGroupMessages(groupGistId, encryptedMsgs);
+    }
+
+    async function deleteMessageFromGroup(groupGistId, groupPassword, messageId, authorName) {
+        if(authorName !== currentUser.name) throw new Error('Удалить можно только свои сообщения');
+        const encryptedMsgs = await getGroupMessagesRaw(groupGistId);
+        const newEncrypted = [];
+        for(const enc of encryptedMsgs) {
+            try {
+                const msg = decryptMessageObj(enc, groupPassword);
+                if(msg.id !== messageId) newEncrypted.push(enc);
+            } catch(e) { newEncrypted.push(enc); }
+        }
+        await updateGroupMessages(groupGistId, newEncrypted);
+    }
+
+    // UI helpers
+    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+
+    async function renderLoginScreen() {
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('groupsScreen').classList.add('hidden');
+        document.getElementById('chatScreen').classList.add('hidden');
+        const accounts = await loadAccounts();
+        const searchInput = document.getElementById('searchAccounts');
+        const renderList = () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filtered = accounts.filter(acc => acc.name.toLowerCase().includes(searchTerm));
+            const container = document.getElementById('accountsList');
+            container.innerHTML = '';
+            if(filtered.length === 0) { container.innerHTML = '<div class="loader">Аккаунтов не найдено</div>'; return; }
+            filtered.forEach(acc => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <img class="avatar" src="${acc.avatar || defaultAvatar(acc.name, 'account')}" alt="avatar">
+                        <div class="item-details">
+                            <div class="item-title">${escapeHtml(acc.name)}</div>
+                            <div class="item-sub">Нажмите для входа</div>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn" data-name="${acc.name}">🔑 Войти</button>
+                        <button class="action-btn danger-btn" data-name="${acc.name}" data-action="delete">🗑️</button>
+                    </div>
+                `;
+                const loginBtn = div.querySelector('.action-btn:not(.danger-btn)');
+                loginBtn.onclick = () => {
+                    const pwd = prompt(`Введите пароль для ${acc.name}`);
+                    if(pwd) loginAndProceed(acc.name, pwd);
+                };
+                const deleteBtn = div.querySelector('.danger-btn');
+                deleteBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    // Проверяем, админ ли текущий пользователь (если залогинен)
+                    const isAdmin = currentUser && currentUser.name === ADMIN_NAME;
+                    if (isAdmin) {
+                        if (confirm(`Удалить аккаунт ${acc.name}?`)) {
+                            try {
+                                await deleteAccount(acc.name, '');
+                                showToast('Аккаунт удалён');
+                                renderLoginScreen();
+                            } catch(e) { showToast(e.message, true); }
+                        }
+                    } else {
+                        const pwd = prompt(`Введите пароль для удаления аккаунта ${acc.name}`);
+                        if(pwd) {
+                            try {
+                                await deleteAccount(acc.name, pwd);
+                                showToast('Аккаунт удалён');
+                                renderLoginScreen();
+                            } catch(e) { showToast(e.message, true); }
+                        }
+                    }
+                };
+                container.appendChild(div);
+            });
+        };
+        searchInput.oninput = renderList;
+        renderList();
+    }
+
+    async function loginAndProceed(name, password) {
+        try {
+            await loginAccount(name, password);
+            await renderGroupsScreen();
+        } catch(e) { showToast(e.message, true); }
+    }
+
+    async function renderGroupsScreen() {
+        const main = await getMainGist();
+        allGroups = main.groups || [];
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('groupsScreen').classList.remove('hidden');
+        document.getElementById('chatScreen').classList.add('hidden');
+        const isAdmin = currentUser.name === ADMIN_NAME;
+        document.getElementById('groupsUserName').innerHTML = `<img class="avatar" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;" src="${currentUser.avatar || defaultAvatar(currentUser.name, 'account')}"> ${escapeHtml(currentUser.name)}${isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}`;
+        const searchInput = document.getElementById('searchGroups');
+        const renderList = () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filtered = allGroups.filter(g => g.name.toLowerCase().includes(searchTerm));
+            const container = document.getElementById('groupsList');
+            container.innerHTML = '';
+            if(filtered.length === 0) { container.innerHTML = '<div class="loader">Групп не найдено</div>'; return; }
+            filtered.forEach(group => {
+                const isMember = group.participants.includes(currentUser.name);
+                const isCreator = group.creator === currentUser.name;
+                const showSettings = isCreator || isAdmin;
+                const showDelete = isCreator || isAdmin;
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <img class="avatar" src="${group.avatar || defaultAvatar(group.name, 'group')}" alt="avatar">
+                        <div class="item-details">
+                            <div class="item-title">${escapeHtml(group.name)}</div>
+                            <div class="item-sub">👥 ${group.participants.length} участников</div>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        ${isMember ? `<button class="action-btn" data-group-id="${group.id}" data-gist-id="${group.gistId}" data-name="${group.name}">🔓 Открыть</button>` : `<button class="action-btn" data-group-id="${group.id}" data-gist-id="${group.gistId}" data-name="${group.name}" data-join="true">🔗 Присоединиться</button>`}
+                        ${showSettings ? `<button class="action-btn" data-group-id="${group.id}" data-settings="true">⚙️</button>` : ''}
+                        ${showDelete ? `<button class="action-btn danger-btn" data-group-id="${group.id}" data-gist-id="${group.gistId}" data-delete="true">🗑️</button>` : ''}
+                    </div>
+                `;
+                const openBtn = div.querySelector('[data-gist-id]');
+                if(openBtn && !openBtn.dataset.join) {
+                    openBtn.onclick = async () => {
+                        const pwd = prompt(`Введите пароль группы "${group.name}":`);
+                        if(pwd) {
+                            try {
+                                const rawMsgs = await getGroupMessagesRaw(group.gistId);
+                                if(rawMsgs.length > 0) decryptMessageObj(rawMsgs[0], pwd);
+                                await openChat(group, pwd);
+                            } catch(e) { showToast(e.message, true); }
+                        }
+                    };
+                }
+                if(openBtn && openBtn.dataset.join) {
+                    openBtn.onclick = async () => {
+                        const code = prompt(`Введите пригласительный код для группы "${group.name}"`);
+                        if(code) {
+                            try {
+                                const { password } = parseInviteCode(code);
+                                const rawMsgs = await getGroupMessagesRaw(group.gistId);
+                                if(rawMsgs.length > 0) decryptMessageObj(rawMsgs[0], password);
+                                const mainData = await getMainGist();
+                                const targetGroup = mainData.groups.find(g => g.gistId === group.gistId);
+                                if(targetGroup && !targetGroup.participants.includes(currentUser.name)) {
+                                    targetGroup.participants.push(currentUser.name);
+                                    await updateMainGist(mainData);
+                                }
+                                await openChat({ ...group, participants: targetGroup.participants }, password);
+                            } catch(e) { showToast(e.message, true); }
+                        }
+                    };
+                }
+                const settingsBtn = div.querySelector('[data-settings="true"]');
+                if(settingsBtn) {
+                    settingsBtn.onclick = () => showGroupSettings(group);
+                }
+                const deleteBtn = div.querySelector('[data-delete="true"]');
+                if(deleteBtn) {
+                    deleteBtn.onclick = async () => {
+                        if(confirm(`Удалить группу "${group.name}"? Это действие необратимо.`)) {
+                            try {
+                                await deleteGroup(group.id, group.gistId);
+                                showToast('Группа удалена');
+                                if(currentGroup && currentGroup.id === group.id) {
+                                    if(pollInterval) clearInterval(pollInterval);
+                                    currentGroup = null;
+                                }
+                                await renderGroupsScreen();
+                            } catch(e) { showToast(e.message, true); }
+                        }
+                    };
+                }
+                container.appendChild(div);
+            });
+        };
+        searchInput.oninput = renderList;
+        renderList();
+    }
+
+    async function openChat(group, groupPassword) {
+        if(pollInterval) clearInterval(pollInterval);
+        currentGroup = group;
+        activeGroupPassword = groupPassword;
+        try {
+            messages = await loadAndDecryptMessages(group.gistId, groupPassword);
+            renderChatMessages();
+            document.getElementById('groupsScreen').classList.add('hidden');
+            document.getElementById('chatScreen').classList.remove('hidden');
+            document.getElementById('chatGroupTitle').innerHTML = `<img class="avatar" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;" src="${group.avatar || defaultAvatar(group.name, 'group')}"> ${escapeHtml(group.name)}`;
+            pollInterval = setInterval(async () => {
+                if(currentGroup && activeGroupPassword) {
+                    try {
+                        const newMsgs = await loadAndDecryptMessages(currentGroup.gistId, activeGroupPassword);
+                        if(JSON.stringify(newMsgs) !== JSON.stringify(messages)) {
+                            messages = newMsgs;
+                            renderChatMessages();
+                        }
+                    } catch(e) { console.warn('poll err', e); }
+                }
+            }, 4000);
+        } catch(e) { showToast(`Ошибка загрузки чата: ${e.message}`, true); renderGroupsScreen(); }
+    }
+
+    function renderChatMessages() {
+        const container = document.getElementById('chatMessages');
+        container.innerHTML = '';
+        messages.forEach(msg => {
+            if(msg.error) {
+                const div = document.createElement('div');
+                div.className = 'message message-other';
+                div.innerHTML = `<div>[Ошибка расшифровки]</div>`;
+                container.appendChild(div);
+                return;
+            }
+            const isOwn = msg.author === currentUser.name;
+            const div = document.createElement('div');
+            div.className = `message ${isOwn ? 'message-own' : 'message-other'}`;
+            let contentHtml = '';
+            if(msg.type === 'text') contentHtml = `<div>${escapeHtml(msg.content)}</div>`;
+            else if(msg.type === 'image') contentHtml = `<img src="data:image/jpeg;base64,${msg.content}" class="message-img" onclick="window.open(this.src)">`;
+            else if(msg.type === 'voice') contentHtml = `<audio controls src="data:audio/webm;base64,${msg.content}"></audio>`;
+            const deleteBtn = isOwn ? `<button class="delete-btn" data-id="${msg.id}">🗑️</button>` : '';
+            div.innerHTML = contentHtml + `<div class="message-meta">${new Date(msg.timestamp).toLocaleTimeString()} ${msg.author} ${deleteBtn}</div>`;
+            container.appendChild(div);
+        });
+        container.scrollTop = container.scrollHeight;
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.onclick = async (e) => {
+                e.stopPropagation();
+                const msgId = btn.getAttribute('data-id');
+                if(confirm('Удалить сообщение?')) {
+                    try {
+                        await deleteMessageFromGroup(currentGroup.gistId, activeGroupPassword, msgId, currentUser.name);
+                        messages = await loadAndDecryptMessages(currentGroup.gistId, activeGroupPassword);
+                        renderChatMessages();
+                    } catch(e) { showToast(e.message, true); }
+                }
+            };
+        });
+    }
+
+    async function sendTextMessage(text) {
+        if(!text.trim() || !currentGroup || !activeGroupPassword) return;
+        const msgObj = {
+            id: Date.now() + '-' + Math.random(),
+            author: currentUser.name,
+            timestamp: Date.now(),
+            type: 'text',
+            content: text.trim()
+        };
+        await sendNewMessage(currentGroup.gistId, activeGroupPassword, msgObj);
+        messages = await loadAndDecryptMessages(currentGroup.gistId, activeGroupPassword);
+        renderChatMessages();
+    }
+
+    async function sendMediaMessage(type, base64Data) {
+        if(!currentGroup || !activeGroupPassword) return;
+        const msgObj = {
+            id: Date.now() + '-' + Math.random(),
+            author: currentUser.name,
+            timestamp: Date.now(),
+            type: type,
+            content: base64Data
+        };
+        await sendNewMessage(currentGroup.gistId, activeGroupPassword, msgObj);
+        messages = await loadAndDecryptMessages(currentGroup.gistId, activeGroupPassword);
+        renderChatMessages();
+    }
+
+    // Медиа
+    function handleImageUpload() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                const base64 = ev.target.result.split(',')[1];
+                await sendMediaMessage('image', base64);
+            };
+            reader.readAsDataURL(file);
+        };
+        input.click();
+    }
+
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let mediaStream = null;
+    async function startVoiceRecording() {
+        if(isRecording) return;
+        try {
+            mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(mediaStream);
+            audioChunks = [];
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = async () => {
+                const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    const base64 = ev.target.result.split(',')[1];
+                    await sendMediaMessage('voice', base64);
+                    if(mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+                };
+                reader.readAsDataURL(blob);
+                isRecording = false;
+                document.getElementById('voiceRecordBtn').style.background = '#6a1b9a';
+            };
+            mediaRecorder.start();
+            isRecording = true;
+            document.getElementById('voiceRecordBtn').style.background = '#c44bff';
+            showToast('Запись... отпустите кнопку');
+        } catch(e) { showToast('Ошибка доступа к микрофону', true); }
+    }
+    function stopVoiceRecording() {
+        if(mediaRecorder && isRecording) mediaRecorder.stop();
+    }
+
+    // Настройки аккаунта
+    function showAccountSettings() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <h3>Настройки аккаунта</h3>
+                <img class="avatar-preview" id="accAvatarPreview" src="${currentUser.avatar}">
+                <input type="file" id="accAvatarInput" accept="image/*">
+                <input type="password" id="accNewPassword" placeholder="Новый пароль (оставьте пустым)">
+                <button id="saveAccSettings">Сохранить</button>
+                <button id="closeModal">Отмена</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const avatarInput = modal.querySelector('#accAvatarInput');
+        avatarInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => modal.querySelector('#accAvatarPreview').src = ev.target.result;
+                reader.readAsDataURL(file);
+            }
+        };
+        modal.querySelector('#saveAccSettings').onclick = async () => {
+            const newPassword = modal.querySelector('#accNewPassword').value;
+            const avatar = modal.querySelector('#accAvatarPreview').src;
+            const updates = {};
+            if(avatar !== currentUser.avatar) updates.avatar = avatar;
+            if(newPassword) updates.passwordHash = hashPassword(newPassword);
+            try {
+                await updateAccount(currentUser.name, updates);
+                if(newPassword) currentUser.passwordHash = updates.passwordHash;
+                if(avatar) currentUser.avatar = avatar;
+                showToast('Аккаунт обновлён');
+                modal.remove();
+                await renderGroupsScreen();
+            } catch(e) { showToast(e.message, true); }
+        };
+        modal.querySelector('#closeModal').onclick = () => modal.remove();
+    }
+
+    function showGroupSettings(group) {
+        // Проверяем права: создатель или админ
+        if (group.creator !== currentUser.name && currentUser.name !== ADMIN_NAME) {
+            showToast('Только создатель или администратор может изменять настройки', true);
+            return;
+        }
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <h3>Настройки группы</h3>
+                <img class="avatar-preview" id="groupAvatarPreview" src="${group.avatar}">
+                <input type="file" id="groupAvatarInput" accept="image/*">
+                <input type="text" id="groupNameInput" placeholder="Название" value="${escapeHtml(group.name)}">
+                <textarea id="groupDescInput" placeholder="Описание">${escapeHtml(group.description || '')}</textarea>
+                <button id="saveGroupSettings">Сохранить</button>
+                <button id="closeModal">Отмена</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const avatarInput = modal.querySelector('#groupAvatarInput');
+        avatarInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => modal.querySelector('#groupAvatarPreview').src = ev.target.result;
+                reader.readAsDataURL(file);
+            }
+        };
+        modal.querySelector('#saveGroupSettings').onclick = async () => {
+            const newName = modal.querySelector('#groupNameInput').value.trim();
+            const newDesc = modal.querySelector('#groupDescInput').value;
+            const avatar = modal.querySelector('#groupAvatarPreview').src;
+            if(!newName) return showToast('Название не может быть пустым');
+            const updates = { name: newName, description: newDesc };
+            if(avatar !== group.avatar) updates.avatar = avatar;
+            try {
+                await updateGroupMetadata(group.id, updates);
+                showToast('Группа обновлена');
+                modal.remove();
+                if(currentGroup && currentGroup.id === group.id) {
+                    currentGroup = { ...currentGroup, ...updates };
+                    document.getElementById('chatGroupTitle').innerHTML = `<img class="avatar" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;" src="${updates.avatar || currentGroup.avatar}"> ${escapeHtml(newName)}`;
+                }
+                await renderGroupsScreen();
+            } catch(e) { showToast(e.message, true); }
+        };
+        modal.querySelector('#closeModal').onclick = () => modal.remove();
+    }
+
+    // Обработчики UI
+    document.getElementById('createAccBtn').onclick = async () => {
+        const name = document.getElementById('newAccName').value.trim();
+        const pass = document.getElementById('newAccPass').value;
+        if(!name || !pass) return showToast('Введите имя и пароль');
+        try {
+            await createAccount(name, pass);
+            showToast('Аккаунт создан, войдите');
+            renderLoginScreen();
+        } catch(e) { showToast(e.message, true); }
+    };
+
+    document.getElementById('logoutBtn').onclick = () => {
+        if(pollInterval) clearInterval(pollInterval);
+        currentUser = null;
+        renderLoginScreen();
+    };
+
+    document.getElementById('backToGroupsBtn').onclick = async () => {
+        if(pollInterval) clearInterval(pollInterval);
+        await renderGroupsScreen();
+    };
+
+    document.getElementById('createGroupBtn').onclick = async () => {
+        const name = prompt('Название группы:');
+        if(!name) return;
+        const pwd = prompt('Пароль группы (сид-фраза):');
+        if(!pwd) return;
+        const desc = prompt('Описание (необязательно):', '');
+        try {
+            const { inviteCode } = await createNewGroup(name, pwd, null, desc || '');
+            showToast(`Группа создана! Код: ${inviteCode}`);
+            await renderGroupsScreen();
+        } catch(e) { showToast(e.message, true); }
+    };
+
+    document.getElementById('joinGroupBtn').onclick = async () => {
+        const code = prompt('Введите код приглашения:');
+        if(!code) return;
+        try {
+            const { group, password } = await joinGroupByCode(code);
+            showToast('Присоединение успешно!');
+            await renderGroupsScreen();
+            await openChat(group, password);
+        } catch(e) { showToast(e.message, true); }
+    };
+
+    document.getElementById('sendTextBtn').onclick = () => {
+        const input = document.getElementById('messageInput');
+        sendTextMessage(input.value);
+        input.value = '';
+    };
+    document.getElementById('messageInput').addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') document.getElementById('sendTextBtn').click();
+    });
+    document.getElementById('attachImageBtn').onclick = handleImageUpload;
+    document.getElementById('voiceRecordBtn').onmousedown = startVoiceRecording;
+    document.getElementById('voiceRecordBtn').onmouseup = stopVoiceRecording;
+    document.getElementById('voiceRecordBtn').ontouchstart = (e) => { e.preventDefault(); startVoiceRecording(); };
+    document.getElementById('voiceRecordBtn').ontouchend = (e) => { e.preventDefault(); stopVoiceRecording(); };
+
+    document.getElementById('showInviteBtn').onclick = () => {
+        if(currentGroup && activeGroupPassword) {
+            const inviteCode = generateInviteCode(currentGroup.gistId, activeGroupPassword);
+            navigator.clipboard.writeText(inviteCode).then(() => showToast('Код скопирован')).catch(() => showToast('Код: ' + inviteCode));
+        } else showToast('Сначала войдите в группу', true);
+    };
+    document.getElementById('groupSettingsBtn').onclick = () => {
+        if(currentGroup) showGroupSettings(currentGroup);
+        else showToast('Группа не выбрана', true);
+    };
+    document.getElementById('accountSettingsBtn').onclick = showAccountSettings;
+
+    renderLoginScreen();
+</script>
+</body>
+</html>
