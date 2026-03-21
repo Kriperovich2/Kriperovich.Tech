@@ -263,8 +263,6 @@
             font-size: 0.7rem;
             margin-left: 8px;
         }
-
-        /* Token modal */
         .token-modal {
             position: fixed;
             top: 0;
@@ -316,6 +314,11 @@
             color: #9b8bcb;
             font-size: 0.7rem;
             text-align: center;
+        }
+        .flex-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
     </style>
 </head>
@@ -539,10 +542,14 @@
     }
 
     // ----- ГРУППЫ -----
-    async function createNewGroup(name, groupPassword, avatar = null, description = '') {
+    async function createNewGroup(name, groupPassword, avatar = null, description = '', customInviteCode = null) {
         const gistId = await createNewGroupGist([]);
         const main = await getMainGist();
         const groups = main.groups || [];
+        let inviteCode = customInviteCode;
+        if (!inviteCode) {
+            inviteCode = generateInviteCode(gistId, groupPassword);
+        }
         const newGroup = {
             id: Date.now().toString(),
             name,
@@ -550,12 +557,12 @@
             participants: [currentUser.name],
             creator: currentUser.name,
             avatar: avatar || defaultAvatar(name, 'group'),
-            description
+            description,
+            inviteCode: inviteCode
         };
         groups.push(newGroup);
         main.groups = groups;
         await updateMainGist(main);
-        const inviteCode = generateInviteCode(gistId, groupPassword);
         return { group: newGroup, inviteCode };
     }
 
@@ -590,31 +597,53 @@
     }
 
     async function joinGroupByCode(inviteCode) {
-        const { gistId, password } = parseInviteCode(inviteCode);
-        const rawMsgs = await getGroupMessagesRaw(gistId);
-        if (rawMsgs.length > 0) decryptMessageObj(rawMsgs[0], password);
         const main = await getMainGist();
-        let group = main.groups.find(g => g.gistId === gistId);
-        if (!group) {
-            const groupName = prompt('Введите название группы:', 'Новая группа');
-            if (!groupName) throw new Error('Название обязательно');
-            group = {
-                id: Date.now().toString(),
-                name: groupName,
-                gistId,
-                participants: [currentUser.name],
-                creator: null,
-                avatar: defaultAvatar(groupName, 'group'),
-                description: ''
-            };
-            main.groups.push(group);
-        } else {
+        // 1. ищем по кастомному коду
+        let group = main.groups.find(g => g.inviteCode === inviteCode);
+        if (group) {
+            const password = prompt(`Введите пароль группы "${group.name}":`);
+            if (!password) throw new Error('Пароль не введен');
+            const rawMsgs = await getGroupMessagesRaw(group.gistId);
+            if (rawMsgs.length > 0) {
+                try {
+                    decryptMessageObj(rawMsgs[0], password);
+                } catch (e) {
+                    throw new Error('Неверный пароль группы');
+                }
+            }
             if (!group.participants.includes(currentUser.name)) {
                 group.participants.push(currentUser.name);
+                await updateMainGist(main);
             }
+            return { group, password };
+        } else {
+            // 2. старый метод (код содержит gistId и пароль)
+            const { gistId, password } = parseInviteCode(inviteCode);
+            const rawMsgs = await getGroupMessagesRaw(gistId);
+            if (rawMsgs.length > 0) decryptMessageObj(rawMsgs[0], password);
+            group = main.groups.find(g => g.gistId === gistId);
+            if (!group) {
+                const groupName = prompt('Введите название группы:', 'Новая группа');
+                if (!groupName) throw new Error('Название обязательно');
+                group = {
+                    id: Date.now().toString(),
+                    name: groupName,
+                    gistId,
+                    participants: [currentUser.name],
+                    creator: null,
+                    avatar: defaultAvatar(groupName, 'group'),
+                    description: '',
+                    inviteCode: null
+                };
+                main.groups.push(group);
+            } else {
+                if (!group.participants.includes(currentUser.name)) {
+                    group.participants.push(currentUser.name);
+                }
+            }
+            await updateMainGist(main);
+            return { group, password };
         }
-        await updateMainGist(main);
-        return { group, password };
     }
 
     // ----- СООБЩЕНИЯ -----
@@ -1015,6 +1044,14 @@
                 <input type="file" id="groupAvatarInput" accept="image/*">
                 <input type="text" id="groupNameInput" placeholder="Название" value="${escapeHtml(group.name)}">
                 <textarea id="groupDescInput" placeholder="Описание">${escapeHtml(group.description || '')}</textarea>
+                <div style="margin: 12px 0;">
+                    <label>Код приглашения:</label>
+                    <div class="flex-row">
+                        <input type="text" id="groupInviteCode" value="${escapeHtml(group.inviteCode || '')}" placeholder="Не задан" style="flex:1;">
+                        <button id="copyInviteCodeBtn" class="action-btn">📋</button>
+                    </div>
+                    <small>Если код не задан, используется стандартный (содержит пароль).</small>
+                </div>
                 <button id="saveGroupSettings">Сохранить</button>
                 <button id="closeModal">Отмена</button>
             </div>
@@ -1029,13 +1066,34 @@
                 reader.readAsDataURL(file);
             }
         };
+        const inviteCodeInput = modal.querySelector('#groupInviteCode');
+        const copyInviteCodeBtn = modal.querySelector('#copyInviteCodeBtn');
+        copyInviteCodeBtn.onclick = () => {
+            if (inviteCodeInput.value) {
+                navigator.clipboard.writeText(inviteCodeInput.value);
+                showToast('Код скопирован');
+            } else {
+                showToast('Код не задан', true);
+            }
+        };
         modal.querySelector('#saveGroupSettings').onclick = async () => {
             const newName = modal.querySelector('#groupNameInput').value.trim();
             const newDesc = modal.querySelector('#groupDescInput').value;
             const avatar = modal.querySelector('#groupAvatarPreview').src;
+            const newInviteCode = inviteCodeInput.value.trim() || null;
             if (!newName) return showToast('Название не может быть пустым');
+            // Проверка уникальности кода
+            if (newInviteCode) {
+                const mainData = await getMainGist();
+                const existingGroup = mainData.groups.find(g => g.id !== group.id && g.inviteCode === newInviteCode);
+                if (existingGroup) {
+                    showToast('Такой код приглашения уже используется другой группой', true);
+                    return;
+                }
+            }
             const updates = { name: newName, description: newDesc };
             if (avatar !== group.avatar) updates.avatar = avatar;
+            if (newInviteCode !== group.inviteCode) updates.inviteCode = newInviteCode;
             try {
                 await updateGroupMetadata(group.id, updates);
                 showToast('Группа обновлена');
@@ -1123,7 +1181,7 @@
         }
     })();
 
-    // ----- ОБРАБОТЧИКИ UI (дополнительные, чтобы гарантировать работу) -----
+    // ----- ОБРАБОТЧИКИ UI -----
     document.getElementById('createAccBtn').onclick = async () => {
         const name = document.getElementById('newAccName').value.trim();
         const pass = document.getElementById('newAccPass').value;
@@ -1149,8 +1207,24 @@
         const pwd = prompt('Пароль группы (сид-фраза):');
         if (!pwd) return;
         const desc = prompt('Описание (необязательно):', '');
+        let customCode = null;
+        const useCustom = confirm('Хотите задать свой код приглашения? (Отмена - сгенерировать автоматически)');
+        if (useCustom) {
+            customCode = prompt('Введите код приглашения (текст):');
+            if (!customCode) {
+                showToast('Код не может быть пустым, будет сгенерирован автоматически');
+                customCode = null;
+            } else {
+                const main = await getMainGist();
+                const existing = main.groups.find(g => g.inviteCode === customCode);
+                if (existing) {
+                    showToast('Такой код уже используется, будет сгенерирован автоматически', true);
+                    customCode = null;
+                }
+            }
+        }
         try {
-            const { inviteCode } = await createNewGroup(name, pwd, null, desc || '');
+            const { inviteCode } = await createNewGroup(name, pwd, null, desc || '', customCode);
             showToast(`Группа создана! Код: ${inviteCode}`);
             await renderGroupsScreen();
         } catch (e) { showToast(e.message, true); }
@@ -1180,7 +1254,10 @@
     document.getElementById('voiceRecordBtn').ontouchend = (e) => { e.preventDefault(); stopVoiceRecording(); };
     document.getElementById('showInviteBtn').onclick = () => {
         if (currentGroup && activeGroupPassword) {
-            const inviteCode = generateInviteCode(currentGroup.gistId, activeGroupPassword);
+            let inviteCode = currentGroup.inviteCode;
+            if (!inviteCode) {
+                inviteCode = generateInviteCode(currentGroup.gistId, activeGroupPassword);
+            }
             navigator.clipboard.writeText(inviteCode).then(() => showToast('Код скопирован')).catch(() => showToast('Код: ' + inviteCode));
         } else showToast('Сначала войдите в группу', true);
     };
