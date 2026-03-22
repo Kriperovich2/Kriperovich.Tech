@@ -451,9 +451,15 @@
     }
 
     async function getMainGist() {
-        const data = await apiRequest(`https://api.github.com/gists/${MAIN_GIST_ID}`);
-        const content = data.files['main.json']?.content || '{"accounts":[],"groups":[]}';
-        return JSON.parse(content);
+        try {
+            const data = await apiRequest(`https://api.github.com/gists/${MAIN_GIST_ID}`);
+            const content = data.files['main.json']?.content || '{"accounts":[],"groups":[]}';
+            return JSON.parse(content);
+        } catch (e) {
+            console.error('Ошибка парсинга main.json:', e);
+            showToast('Ошибка чтения данных: повреждён JSON. Используются пустые значения.', true);
+            return { accounts: [], groups: [] };
+        }
     }
 
     async function updateMainGist(contentObj) {
@@ -462,9 +468,15 @@
     }
 
     async function getGroupMessagesRaw(gistId) {
-        const data = await apiRequest(`https://api.github.com/gists/${gistId}`);
-        const content = data.files['messages.json']?.content || '[]';
-        return JSON.parse(content);
+        try {
+            const data = await apiRequest(`https://api.github.com/gists/${gistId}`);
+            const content = data.files['messages.json']?.content || '[]';
+            return JSON.parse(content);
+        } catch (e) {
+            console.error(`Ошибка парсинга сообщений для gist ${gistId}:`, e);
+            showToast('Ошибка загрузки сообщений: возможно, повреждены данные.', true);
+            return [];
+        }
     }
 
     async function updateGroupMessages(gistId, encryptedMessagesArray) {
@@ -652,7 +664,7 @@
             try {
                 decrypted.push(decryptMessageObj(enc, groupPassword));
             } catch (e) {
-                decrypted.push({ id: 'error', error: true, content: '[Не удалось расшифровать]' });
+                decrypted.push({ id: 'error-' + Date.now() + Math.random(), error: true, content: '[Не удалось расшифровать]' });
             }
         }
         return decrypted.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
@@ -684,7 +696,13 @@
         document.getElementById('loginScreen').classList.remove('hidden');
         document.getElementById('groupsScreen').classList.add('hidden');
         document.getElementById('chatScreen').classList.add('hidden');
-        const accounts = await loadAccounts();
+        let accounts = [];
+        try {
+            accounts = await loadAccounts();
+        } catch (err) {
+            showToast('Ошибка загрузки аккаунтов: ' + err.message, true);
+            accounts = [];
+        }
         const searchInput = document.getElementById('searchAccounts');
         const renderList = () => {
             const searchTerm = searchInput.value.toLowerCase();
@@ -871,7 +889,7 @@
             if (msg.error) {
                 const div = document.createElement('div');
                 div.className = 'message message-other';
-                div.innerHTML = `<div>[Ошибка расшифровки]</div>`;
+                div.innerHTML = `<div>[${escapeHtml(msg.content)}]</div>`;
                 container.appendChild(div);
                 return;
             }
@@ -883,7 +901,7 @@
             else if (msg.type === 'image') contentHtml = `<img src="data:image/jpeg;base64,${msg.content}" class="message-img" onclick="window.open(this.src)">`;
             else if (msg.type === 'voice') contentHtml = `<audio controls src="data:audio/webm;base64,${msg.content}"></audio>`;
             const deleteBtn = isOwn ? `<button class="delete-btn" data-id="${msg.id}">🗑️</button>` : '';
-            div.innerHTML = contentHtml + `<div class="message-meta">${new Date(msg.timestamp).toLocaleTimeString()} ${msg.author} ${deleteBtn}</div>`;
+            div.innerHTML = contentHtml + `<div class="message-meta">${new Date(msg.timestamp).toLocaleTimeString()} ${escapeHtml(msg.author)} ${deleteBtn}</div>`;
             container.appendChild(div);
         });
         container.scrollTop = container.scrollHeight;
