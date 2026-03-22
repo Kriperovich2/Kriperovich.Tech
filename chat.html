@@ -6,7 +6,6 @@
     <title>Анонимный мессенджер | GistDB</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <style>
-        /* (стили без изменений, как в предыдущей версии) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -16,6 +15,7 @@
             overflow: hidden;
             transition: background 0.3s, color 0.3s;
         }
+        /* Тёмная тема (по умолчанию) */
         body.dark {
             --bg-page: #0a0712;
             --bg-screen: #13101c;
@@ -29,6 +29,7 @@
             --accent-hover: #8a2bbe;
             --danger: #8b3c3c;
         }
+        /* Светлая тема */
         body.light {
             --bg-page: #f0f2f5;
             --bg-screen: #ffffff;
@@ -148,7 +149,7 @@
             border: none;
             border-radius: 24px;
             color: var(--text-primary);
-            font-size: 16px;
+            font-size: 16px; /* Предотвращает масштабирование на iOS */
         }
         .chat-messages {
             flex: 1;
@@ -158,31 +159,21 @@
             flex-direction: column;
             gap: 8px;
         }
-        .message-wrapper {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-        }
-        .message-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-        .message-bubble {
-            max-width: 70%;
+        .message {
+            max-width: 80%;
             padding: 8px 12px;
             border-radius: 18px;
             font-size: 0.9rem;
             word-wrap: break-word;
         }
-        .message-own .message-bubble {
+        .message-own {
+            align-self: flex-end;
             background: var(--accent);
             color: white;
             border-bottom-right-radius: 4px;
         }
-        .message-other .message-bubble {
+        .message-other {
+            align-self: flex-start;
             background: var(--bg-header);
             border-bottom-left-radius: 4px;
         }
@@ -226,7 +217,7 @@
             padding: 10px 12px;
             border-radius: 24px;
             color: var(--text-primary);
-            font-size: 16px;
+            font-size: 16px; /* Предотвращает масштабирование на iOS */
             outline: none;
         }
         .input-area button {
@@ -371,25 +362,7 @@
             gap: 8px;
             align-items: center;
         }
-        .tabs {
-            display: flex;
-            background: var(--bg-header);
-            border-bottom: 1px solid var(--border);
-        }
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 12px;
-            cursor: pointer;
-            background: var(--bg-header);
-            color: var(--text-secondary);
-            transition: 0.2s;
-        }
-        .tab.active {
-            color: var(--accent);
-            border-bottom: 2px solid var(--accent);
-            font-weight: bold;
-        }
+        /* Дополнительно для touch */
         button, .action-btn, .btn-icon {
             touch-action: manipulation;
         }
@@ -406,39 +379,34 @@
     <div class="search-bar"><input type="text" id="searchAccounts" placeholder="🔍 Поиск аккаунтов..."></div>
     <div class="list-container" id="accountsList"><div class="loader">Загрузка аккаунтов...</div></div>
     <div style="padding: 16px; border-top: 1px solid var(--border);">
-        <input type="text" id="newAccName" placeholder="Логин (username)" autocomplete="off">
-        <input type="password" id="newAccPass" placeholder="Пароль">
+        <input type="text" id="newAccName" placeholder="Новое имя" autocomplete="off">
+        <input type="password" id="newAccPass" placeholder="Пароль аккаунта">
         <button id="createAccBtn" style="margin-top: 8px;">➕ Создать аккаунт</button>
     </div>
 </div>
 
-<!-- Главный экран после входа (вкладки) -->
-<div id="mainScreen" class="screen hidden">
+<!-- Экран групп -->
+<div id="groupsScreen" class="screen hidden">
     <div class="header">
-        <h2 id="mainUserName"></h2>
+        <h2 id="groupsUserName">Группы</h2>
         <div>
             <button id="accountSettingsBtn" class="btn-icon" title="Настройки аккаунта">⚙️</button>
             <button id="logoutBtn" class="btn-icon" title="Сменить аккаунт">🚪</button>
         </div>
     </div>
-    <div class="tabs">
-        <div class="tab" data-tab="groups">📁 Группы</div>
-        <div class="tab" data-tab="directs">💬 Личные чаты</div>
-    </div>
-    <div class="search-bar"><input type="text" id="searchChats" placeholder="🔍 Поиск..."></div>
-    <div class="list-container" id="chatsList"><div class="loader">Загрузка...</div></div>
-    <div class="input-area" style="justify-content: space-evenly; gap: 8px;" id="actionButtonArea">
+    <div class="search-bar"><input type="text" id="searchGroups" placeholder="🔍 Поиск групп..."></div>
+    <div class="list-container" id="groupsList"><div class="loader">Загрузка групп...</div></div>
+    <div class="input-area" style="justify-content: space-evenly; gap: 8px;">
         <button id="createGroupBtn" style="width: auto; padding: 0 16px; border-radius: 24px;">➕ Новая группа</button>
-        <button id="newDirectBtn" style="width: auto; padding: 0 16px; border-radius: 24px;">💬 Новый диалог</button>
     </div>
 </div>
 
 <!-- Экран чата -->
 <div id="chatScreen" class="screen hidden">
     <div class="header">
-        <button id="backToMainBtn" class="btn-icon">←</button>
-        <h2 id="chatTitle">Чат</h2>
-        <button id="chatSettingsBtn" class="btn-icon" title="Настройки">⚙️</button>
+        <button id="backToGroupsBtn" class="btn-icon">←</button>
+        <h2 id="chatGroupTitle">Чат</h2>
+        <button id="groupSettingsBtn" class="btn-icon" title="Настройки группы">⚙️</button>
     </div>
     <div id="chatMessages" class="chat-messages"></div>
     <div class="input-area">
@@ -452,17 +420,15 @@
 <script>
     // ----- ФИКСИРОВАННЫЕ ДАННЫЕ (Gist ID) -----
     const MAIN_GIST_ID = "746f99bb5a18eb2531e7c954e22b78ba";
-    const ADMIN_NAME = "1";
+    const ADMIN_NAME = "1"; // глобальный администратор
 
     let GITHUB_TOKEN = null;
     let currentUser = null;
-    let currentChat = null;
+    let currentGroup = null;
     let allGroups = [];
-    let allDirectChats = [];
     let messages = [];
     let pollInterval = null;
-    let activeChatPassword = null;
-    let accountsCache = [];
+    let activeGroupPassword = null;
 
     function showToast(msg, isError = false) {
         const toast = document.createElement('div');
@@ -477,103 +443,37 @@
         if (!GITHUB_TOKEN) throw new Error('Токен GitHub не задан');
         const headers = { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' };
         if (body) headers['Content-Type'] = 'application/json';
-        const res = await fetch(url + (url.includes('?') ? '&' : '?') + `ts=${Date.now()}`, { method, headers, body: body ? JSON.stringify(body) : undefined });
+        const ts = Date.now();
+        const finalUrl = url + (url.includes('?') ? '&' : '?') + `ts=${ts}`;
+        const res = await fetch(finalUrl, { method, headers, body: body ? JSON.stringify(body) : undefined });
         if (!res.ok) throw new Error(`Gist API error ${res.status}`);
         return await res.json();
     }
 
-    // Функция для безопасного парсинга JSON с очисткой
-    function safeJSONParse(str, fallback = null) {
-        if (!str) return fallback;
-        // Удаляем непечатаемые символы, кроме разрешённых
-        let cleaned = str.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
-        try {
-            return JSON.parse(cleaned);
-        } catch (e) {
-            console.error('JSON parse error:', e);
-            // Пробуем ещё раз, обрезав до последнего валидного места (приблизительно)
-            try {
-                // Найти последнюю закрывающую фигурную скобку
-                let lastValid = cleaned.lastIndexOf('}');
-                if (lastValid > 0) {
-                    let truncated = cleaned.substring(0, lastValid+1);
-                    return JSON.parse(truncated);
-                }
-            } catch (e2) {}
-            return fallback;
-        }
-    }
-
     async function getMainGist() {
-        try {
-            const data = await apiRequest(`https://api.github.com/gists/${MAIN_GIST_ID}`);
-            let content = data.files['main.json']?.content;
-            if (!content) {
-                console.warn('main.json отсутствует, создаём пустой');
-                return { accounts: [], groups: [], directChats: [] };
-            }
-            let parsed = safeJSONParse(content, null);
-            if (parsed) return parsed;
-            
-            // Если основной файл повреждён, пробуем восстановить из backup
-            const backupContent = data.files['main.backup.json']?.content;
-            if (backupContent) {
-                let backupParsed = safeJSONParse(backupContent, null);
-                if (backupParsed) {
-                    showToast('Восстановлены данные из резервной копии', false);
-                    return backupParsed;
-                }
-            }
-            // Если ничего не помогло – спрашиваем пользователя
-            const reset = confirm('Данные повреждены и не могут быть восстановлены автоматически. Сбросить все данные? (ВНИМАНИЕ: все аккаунты и группы будут удалены!)');
-            if (reset) {
-                const empty = { accounts: [], groups: [], directChats: [] };
-                await updateMainGist(empty, true); // принудительно перезаписываем
-                return empty;
-            } else {
-                throw new Error('Данные повреждены, работа невозможна. Обратитесь к администратору.');
-            }
-        } catch (e) {
-            console.error('Ошибка получения main gist:', e);
-            showToast('Критическая ошибка: ' + e.message, true);
-            throw e;
-        }
+        const data = await apiRequest(`https://api.github.com/gists/${MAIN_GIST_ID}`);
+        const content = data.files['main.json']?.content || '{"accounts":[],"groups":[]}';
+        return JSON.parse(content);
     }
 
-    async function updateMainGist(contentObj, forceReset = false) {
-        // Создаём резервную копию перед записью
-        try {
-            const current = await apiRequest(`https://api.github.com/gists/${MAIN_GIST_ID}`);
-            const currentContent = current.files['main.json']?.content;
-            if (currentContent && !forceReset) {
-                // Сохраняем резервную копию
-                const backupPayload = { files: { 'main.backup.json': { content: currentContent } } };
-                await apiRequest(`https://api.github.com/gists/${MAIN_GIST_ID}`, 'PATCH', backupPayload);
-            }
-        } catch(e) { console.warn('Не удалось создать резервную копию', e); }
-
+    async function updateMainGist(contentObj) {
         const payload = { files: { 'main.json': { content: JSON.stringify(contentObj, null, 2) } } };
         await apiRequest(`https://api.github.com/gists/${MAIN_GIST_ID}`, 'PATCH', payload);
     }
 
-    async function getMessagesRaw(gistId) {
-        try {
-            const data = await apiRequest(`https://api.github.com/gists/${gistId}`);
-            const content = data.files['messages.json']?.content || '[]';
-            return safeJSONParse(content, []);
-        } catch (e) {
-            console.error(`Ошибка парсинга сообщений ${gistId}:`, e);
-            return [];
-        }
+    async function getGroupMessagesRaw(gistId) {
+        const data = await apiRequest(`https://api.github.com/gists/${gistId}`);
+        const content = data.files['messages.json']?.content || '[]';
+        return JSON.parse(content);
     }
 
-    async function updateMessages(gistId, encryptedArray) {
-        const payload = { files: { 'messages.json': { content: JSON.stringify(encryptedArray, null, 2) } } };
+    async function updateGroupMessages(gistId, encryptedMessagesArray) {
+        const payload = { files: { 'messages.json': { content: JSON.stringify(encryptedMessagesArray, null, 2) } } };
         await apiRequest(`https://api.github.com/gists/${gistId}`, 'PATCH', payload);
     }
 
-    async function createNewGist(initialMessages = []) {
-        const payload = { description: "Chat messages", public: false, files: { 'messages.json': { content: JSON.stringify(initialMessages) } } };
+    async function createNewGroupGist(initialMessages = []) {
+        const payload = { description: "Group messages", public: false, files: { 'messages.json': { content: JSON.stringify(initialMessages) } } };
         const gist = await apiRequest('https://api.github.com/gists', 'POST', payload);
         return gist.id;
     }
@@ -592,14 +492,11 @@
             const decrypted = bytes.toString(CryptoJS.enc.Utf8);
             if (!decrypted) throw new Error();
             return JSON.parse(decrypted);
-        } catch (e) { throw new Error('Неверный пароль'); }
+        } catch (e) { throw new Error('Неверный пароль группы'); }
     }
 
     function hashPassword(pass) { return CryptoJS.SHA256(pass).toString(); }
-    function generateDirectPassword(userA, userB) {
-        const names = [userA, userB].sort();
-        return CryptoJS.SHA256(names.join(':')).toString();
-    }
+
     function defaultAvatar(name, type = 'account') {
         const canvas = document.createElement('canvas');
         canvas.width = 100;
@@ -614,418 +511,357 @@
     }
 
     // ----- АККАУНТЫ -----
-    async function loadAccounts() { const main = await getMainGist(); return main.accounts || []; }
-    async function createAccount(username, password, displayName = null) {
+    async function loadAccounts() {
+        const main = await getMainGist();
+        return main.accounts || [];
+    }
+
+    async function createAccount(name, password, avatar = null) {
         const main = await getMainGist();
         const accounts = main.accounts || [];
-        if (accounts.find(a => a.username === username)) throw new Error('Логин уже существует');
-        const newAccount = {
-            username,
+        if (accounts.find(a => a.name === name)) throw new Error('Имя уже существует');
+        accounts.push({
+            name,
             passwordHash: hashPassword(password),
-            displayName: displayName || username,
-            avatar: defaultAvatar(username, 'account')
-        };
-        accounts.push(newAccount);
+            avatar: avatar || defaultAvatar(name, 'account')
+        });
         main.accounts = accounts;
         await updateMainGist(main);
         return true;
     }
-    async function loginAccount(username, password) {
+
+    async function loginAccount(name, password) {
         const main = await getMainGist();
-        const acc = main.accounts.find(a => a.username === username);
+        const acc = main.accounts.find(a => a.name === name);
         if (!acc) throw new Error('Аккаунт не найден');
         if (acc.passwordHash !== hashPassword(password)) throw new Error('Неверный пароль');
-        currentUser = { ...acc };
+        currentUser = { name, passwordHash: acc.passwordHash, avatar: acc.avatar };
         allGroups = main.groups || [];
-        allDirectChats = main.directChats || [];
-        accountsCache = main.accounts || [];
-        return { groups: allGroups, directs: allDirectChats };
+        return allGroups;
     }
-    async function updateAccount(username, updates) {
+
+    async function updateAccount(name, updates) {
         const main = await getMainGist();
-        const index = main.accounts.findIndex(a => a.username === username);
+        const accounts = main.accounts;
+        const index = accounts.findIndex(a => a.name === name);
         if (index === -1) throw new Error('Аккаунт не найден');
-        main.accounts[index] = { ...main.accounts[index], ...updates };
+        accounts[index] = { ...accounts[index], ...updates };
+        main.accounts = accounts;
         await updateMainGist(main);
-        if (currentUser && currentUser.username === username) currentUser = { ...currentUser, ...updates };
-        accountsCache = main.accounts;
+        if (currentUser && currentUser.name === name) {
+            currentUser = { ...currentUser, ...updates };
+        }
     }
-    async function deleteAccount(username, password) {
+
+    async function deleteAccount(name, password) {
         const main = await getMainGist();
-        const acc = main.accounts.find(a => a.username === username);
+        const acc = main.accounts.find(a => a.name === name);
         if (!acc) throw new Error('Аккаунт не найден');
-        const isAdmin = currentUser && currentUser.username === ADMIN_NAME;
-        if (!isAdmin && acc.passwordHash !== hashPassword(password)) throw new Error('Неверный пароль');
-        for (const g of main.groups) g.participants = g.participants.filter(p => p !== username);
-        main.directChats = (main.directChats || []).filter(d => !d.participants.includes(username));
-        main.accounts = main.accounts.filter(a => a.username !== username);
+        
+        const isAdmin = currentUser && currentUser.name === ADMIN_NAME;
+        if (!isAdmin && acc.passwordHash !== hashPassword(password)) {
+            throw new Error('Неверный пароль');
+        }
+        
+        const groups = main.groups || [];
+        for (const group of groups) {
+            if (group.participants.includes(name)) {
+                group.participants = group.participants.filter(p => p !== name);
+            }
+        }
+        main.groups = groups;
+        main.accounts = main.accounts.filter(a => a.name !== name);
         await updateMainGist(main);
     }
 
     // ----- ГРУППЫ -----
-    async function createGroup(name, password, avatar = null, description = '') {
-        const gistId = await createNewGist([]);
+    async function createNewGroup(name, groupPassword, avatar = null, description = '') {
+        const gistId = await createNewGroupGist([]);
         const main = await getMainGist();
         const groups = main.groups || [];
         const newGroup = {
             id: Date.now().toString(),
             name,
             gistId,
-            participants: [currentUser.username],
-            creator: currentUser.username,
+            participants: [currentUser.name],
+            creator: currentUser.name,
             avatar: avatar || defaultAvatar(name, 'group'),
             description
         };
         groups.push(newGroup);
         main.groups = groups;
         await updateMainGist(main);
-        return newGroup;
+        return { group: newGroup };
     }
+
     async function deleteGroup(groupId, gistId) {
         const main = await getMainGist();
-        const group = main.groups.find(g => g.id === groupId);
+        const groups = main.groups || [];
+        const group = groups.find(g => g.id === groupId);
         if (!group) throw new Error('Группа не найдена');
-        if (group.creator !== currentUser.username && currentUser.username !== ADMIN_NAME) throw new Error('Нет прав');
+        if (group.creator !== currentUser.name && currentUser.name !== ADMIN_NAME) {
+            throw new Error('Только создатель или администратор может удалить группу');
+        }
         await deleteGist(gistId);
-        main.groups = main.groups.filter(g => g.id !== groupId);
+        main.groups = groups.filter(g => g.id !== groupId);
         await updateMainGist(main);
     }
+
     async function updateGroupMetadata(groupId, updates) {
         const main = await getMainGist();
-        const idx = main.groups.findIndex(g => g.id === groupId);
-        if (idx === -1) throw new Error('Группа не найдена');
-        if (main.groups[idx].creator !== currentUser.username && currentUser.username !== ADMIN_NAME) throw new Error('Нет прав');
-        main.groups[idx] = { ...main.groups[idx], ...updates };
+        const groups = main.groups || [];
+        const index = groups.findIndex(g => g.id === groupId);
+        if (index === -1) throw new Error('Группа не найдена');
+        if (groups[index].creator !== currentUser.name && currentUser.name !== ADMIN_NAME) {
+            throw new Error('Только создатель или администратор может изменять настройки группы');
+        }
+        groups[index] = { ...groups[index], ...updates };
+        main.groups = groups;
         await updateMainGist(main);
-        if (currentChat && currentChat.type === 'group' && currentChat.id === groupId) currentChat = { ...currentChat, ...updates };
-    }
-    async function joinGroup(group, password) {
-        const rawMsgs = await getMessagesRaw(group.gistId);
-        if (rawMsgs.length) decryptMessageObj(rawMsgs[0], password);
-        const main = await getMainGist();
-        const target = main.groups.find(g => g.id === group.id);
-        if (!target) throw new Error('Группа не найдена');
-        if (!target.participants.includes(currentUser.username)) target.participants.push(currentUser.username);
-        await updateMainGist(main);
+        if (currentGroup && currentGroup.id === groupId) {
+            currentGroup = { ...currentGroup, ...updates };
+            document.getElementById('chatGroupTitle').innerHTML = `<img class="avatar" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;" src="${currentGroup.avatar}"> ${escapeHtml(currentGroup.name)}`;
+        }
     }
 
-    // ----- ЛИЧНЫЕ ЧАТЫ -----
-    async function getOrCreateDirectChat(otherUsername) {
+    async function joinGroup(group, password) {
+        // Проверка пароля
+        const rawMsgs = await getGroupMessagesRaw(group.gistId);
+        if (rawMsgs.length > 0) {
+            try {
+                decryptMessageObj(rawMsgs[0], password);
+            } catch (e) {
+                throw new Error('Неверный пароль группы');
+            }
+        }
         const main = await getMainGist();
-        let chat = (main.directChats || []).find(d => d.participants.includes(currentUser.username) && d.participants.includes(otherUsername));
-        if (!chat) {
-            const gistId = await createNewGist([]);
-            chat = {
-                id: Date.now().toString(),
-                participants: [currentUser.username, otherUsername].sort(),
-                gistId,
-                lastMessage: null
-            };
-            main.directChats = [...(main.directChats || []), chat];
+        const targetGroup = main.groups.find(g => g.id === group.id);
+        if (!targetGroup) throw new Error('Группа не найдена');
+        if (!targetGroup.participants.includes(currentUser.name)) {
+            targetGroup.participants.push(currentUser.name);
             await updateMainGist(main);
         }
-        return chat;
+        return true;
     }
-    async function loadDirectMessages(chat) {
-        const password = generateDirectPassword(chat.participants[0], chat.participants[1]);
-        const encrypted = await getMessagesRaw(chat.gistId);
+
+    // ----- СООБЩЕНИЯ -----
+    async function loadAndDecryptMessages(gistId, groupPassword) {
+        const encryptedMsgs = await getGroupMessagesRaw(gistId);
         const decrypted = [];
-        for (const enc of encrypted) {
-            try { decrypted.push(decryptMessageObj(enc, password)); }
-            catch { decrypted.push({ id: 'err', error: true, content: '[Не удалось расшифровать]' }); }
+        for (const enc of encryptedMsgs) {
+            try {
+                decrypted.push(decryptMessageObj(enc, groupPassword));
+            } catch (e) {
+                decrypted.push({ id: 'error', error: true, content: '[Не удалось расшифровать]' });
+            }
         }
-        return decrypted.sort((a,b)=>(a.timestamp||0)-(b.timestamp||0));
-    }
-    async function sendDirectMessage(chat, msgObj) {
-        const password = generateDirectPassword(chat.participants[0], chat.participants[1]);
-        const encrypted = await getMessagesRaw(chat.gistId);
-        encrypted.push(encryptMessageObj(msgObj, password));
-        await updateMessages(chat.gistId, encrypted);
-        const main = await getMainGist();
-        const idx = main.directChats.findIndex(d => d.id === chat.id);
-        if (idx !== -1) main.directChats[idx].lastMessage = msgObj.content?.slice(0, 50) || (msgObj.type === 'image' ? '📷 Изображение' : '🎙️ Голосовое');
-        await updateMainGist(main);
+        return decrypted.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
     }
 
-    // ----- ОБЩИЕ ФУНКЦИИ СООБЩЕНИЙ -----
-    async function loadMessages(chat) {
-        if (chat.type === 'group') {
-            const group = allGroups.find(g => g.id === chat.id);
-            if (!group) throw new Error('Группа не найдена');
-            activeChatPassword = prompt(`Введите пароль группы "${group.name}":`);
-            if (!activeChatPassword) throw new Error('Пароль не введён');
-            const encrypted = await getMessagesRaw(group.gistId);
-            const decrypted = [];
-            for (const enc of encrypted) {
-                try { decrypted.push(decryptMessageObj(enc, activeChatPassword)); }
-                catch { decrypted.push({ id: 'err', error: true, content: '[Не удалось расшифровать]' }); }
-            }
-            return decrypted.sort((a,b)=>(a.timestamp||0)-(b.timestamp||0));
-        } else {
-            const direct = allDirectChats.find(d => d.id === chat.id);
-            if (!direct) throw new Error('Чат не найден');
-            const password = generateDirectPassword(direct.participants[0], direct.participants[1]);
-            activeChatPassword = password;
-            return await loadDirectMessages(direct);
-        }
-    }
-    async function sendMessage(chat, msgObj) {
-        if (chat.type === 'group') {
-            const group = allGroups.find(g => g.id === chat.id);
-            if (!group) throw new Error('Группа не найдена');
-            const encrypted = await getMessagesRaw(group.gistId);
-            encrypted.push(encryptMessageObj(msgObj, activeChatPassword));
-            await updateMessages(group.gistId, encrypted);
-        } else {
-            const direct = allDirectChats.find(d => d.id === chat.id);
-            if (!direct) throw new Error('Чат не найден');
-            await sendDirectMessage(direct, msgObj);
-        }
-    }
-    async function deleteMessage(chat, messageId, authorName) {
-        if (authorName !== currentUser.username) throw new Error('Можно удалять только свои сообщения');
-        if (chat.type === 'group') {
-            const group = allGroups.find(g => g.id === chat.id);
-            const encrypted = await getMessagesRaw(group.gistId);
-            const newEncrypted = [];
-            for (const enc of encrypted) {
-                try {
-                    const msg = decryptMessageObj(enc, activeChatPassword);
-                    if (msg.id !== messageId) newEncrypted.push(enc);
-                } catch { newEncrypted.push(enc); }
-            }
-            await updateMessages(group.gistId, newEncrypted);
-        } else {
-            const direct = allDirectChats.find(d => d.id === chat.id);
-            const password = generateDirectPassword(direct.participants[0], direct.participants[1]);
-            const encrypted = await getMessagesRaw(direct.gistId);
-            const newEncrypted = [];
-            for (const enc of encrypted) {
-                try {
-                    const msg = decryptMessageObj(enc, password);
-                    if (msg.id !== messageId) newEncrypted.push(enc);
-                } catch { newEncrypted.push(enc); }
-            }
-            await updateMessages(direct.gistId, newEncrypted);
-        }
+    async function sendNewMessage(groupGistId, groupPassword, msgObj) {
+        const encryptedMsgs = await getGroupMessagesRaw(groupGistId);
+        encryptedMsgs.push(encryptMessageObj(msgObj, groupPassword));
+        await updateGroupMessages(groupGistId, encryptedMsgs);
     }
 
-    function getUserDisplayName(username) {
-        const acc = accountsCache.find(a => a.username === username);
-        return acc ? acc.displayName : username;
-    }
-    function getUserAvatar(username) {
-        const acc = accountsCache.find(a => a.username === username);
-        return acc ? acc.avatar : defaultAvatar(username, 'account');
+    async function deleteMessageFromGroup(groupGistId, groupPassword, messageId, authorName) {
+        if (authorName !== currentUser.name) throw new Error('Удалить можно только свои сообщения');
+        const encryptedMsgs = await getGroupMessagesRaw(groupGistId);
+        const newEncrypted = [];
+        for (const enc of encryptedMsgs) {
+            try {
+                const msg = decryptMessageObj(enc, groupPassword);
+                if (msg.id !== messageId) newEncrypted.push(enc);
+            } catch (e) { newEncrypted.push(enc); }
+        }
+        await updateGroupMessages(groupGistId, newEncrypted);
     }
 
-    // ----- UI -----
-    function escapeHtml(str) { return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+    // ----- UI ХЕЛПЕРЫ -----
+    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
 
     async function renderLoginScreen() {
         document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('mainScreen').classList.add('hidden');
+        document.getElementById('groupsScreen').classList.add('hidden');
         document.getElementById('chatScreen').classList.add('hidden');
-        let accounts = [];
-        try {
-            accounts = await loadAccounts();
-        } catch(e) {
-            showToast('Ошибка загрузки аккаунтов: ' + e.message, true);
-            accounts = [];
-        }
+        const accounts = await loadAccounts();
         const searchInput = document.getElementById('searchAccounts');
-        const render = () => {
-            const term = searchInput.value.toLowerCase();
-            const filtered = accounts.filter(a => a.username.toLowerCase().includes(term));
+        const renderList = () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filtered = accounts.filter(acc => acc.name.toLowerCase().includes(searchTerm));
             const container = document.getElementById('accountsList');
             container.innerHTML = '';
-            if (!filtered.length) { container.innerHTML = '<div class="loader">Аккаунтов не найдено</div>'; return; }
+            if (filtered.length === 0) { container.innerHTML = '<div class="loader">Аккаунтов не найдено</div>'; return; }
             filtered.forEach(acc => {
                 const div = document.createElement('div');
                 div.className = 'item';
                 div.innerHTML = `
                     <div class="item-info">
-                        <img class="avatar" src="${acc.avatar}" alt="avatar">
+                        <img class="avatar" src="${acc.avatar || defaultAvatar(acc.name, 'account')}" alt="avatar">
                         <div class="item-details">
-                            <div class="item-title">${escapeHtml(acc.username)}</div>
-                            <div class="item-sub">${escapeHtml(acc.displayName)}</div>
+                            <div class="item-title">${escapeHtml(acc.name)}</div>
+                            <div class="item-sub">Нажмите для входа</div>
                         </div>
                     </div>
                     <div class="item-actions">
-                        <button class="action-btn" data-username="${acc.username}">🔑 Войти</button>
-                        <button class="action-btn danger-btn" data-username="${acc.username}" data-action="delete">🗑️</button>
+                        <button class="action-btn" data-name="${acc.name}">🔑 Войти</button>
+                        <button class="action-btn danger-btn" data-name="${acc.name}" data-action="delete">🗑️</button>
                     </div>
                 `;
-                div.querySelector('.action-btn:not(.danger-btn)').onclick = () => {
-                    const pwd = prompt(`Введите пароль для ${acc.username}`);
-                    if (pwd) loginAndProceed(acc.username, pwd);
+                const loginBtn = div.querySelector('.action-btn:not(.danger-btn)');
+                loginBtn.onclick = () => {
+                    const pwd = prompt(`Введите пароль для ${acc.name}`);
+                    if (pwd) loginAndProceed(acc.name, pwd);
                 };
-                const delBtn = div.querySelector('.danger-btn');
-                delBtn.onclick = async (e) => {
+                const deleteBtn = div.querySelector('.danger-btn');
+                deleteBtn.onclick = async (e) => {
                     e.stopPropagation();
-                    const isAdmin = currentUser && currentUser.username === ADMIN_NAME;
+                    const isAdmin = currentUser && currentUser.name === ADMIN_NAME;
                     if (isAdmin) {
-                        if (confirm(`Удалить ${acc.username}?`)) {
-                            try { await deleteAccount(acc.username, ''); showToast('Аккаунт удалён'); renderLoginScreen(); }
-                            catch(e) { showToast(e.message, true); }
+                        if (confirm(`Удалить аккаунт ${acc.name}?`)) {
+                            try {
+                                await deleteAccount(acc.name, '');
+                                showToast('Аккаунт удалён');
+                                renderLoginScreen();
+                            } catch (e) { showToast(e.message, true); }
                         }
                     } else {
-                        const pwd = prompt(`Введите пароль для удаления ${acc.username}`);
+                        const pwd = prompt(`Введите пароль для удаления аккаунта ${acc.name}`);
                         if (pwd) {
-                            try { await deleteAccount(acc.username, pwd); showToast('Аккаунт удалён'); renderLoginScreen(); }
-                            catch(e) { showToast(e.message, true); }
+                            try {
+                                await deleteAccount(acc.name, pwd);
+                                showToast('Аккаунт удалён');
+                                renderLoginScreen();
+                            } catch (e) { showToast(e.message, true); }
                         }
                     }
                 };
                 container.appendChild(div);
             });
         };
-        searchInput.oninput = render;
-        render();
-    }
-
-    async function loginAndProceed(username, password) {
-        try {
-            await loginAccount(username, password);
-            await renderMainScreen();
-        } catch(e) { showToast(e.message, true); }
-    }
-
-    let currentTab = 'groups';
-    async function renderMainScreen() {
-        const main = await getMainGist();
-        allGroups = main.groups || [];
-        allDirectChats = main.directChats || [];
-        accountsCache = main.accounts || [];
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('mainScreen').classList.remove('hidden');
-        document.getElementById('chatScreen').classList.add('hidden');
-        const isAdmin = currentUser.username === ADMIN_NAME;
-        document.getElementById('mainUserName').innerHTML = `<img class="avatar" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;" src="${currentUser.avatar}"> ${escapeHtml(currentUser.displayName)}${isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}`;
-        document.getElementById('createGroupBtn').onclick = async () => {
-            const name = prompt('Название группы:');
-            if (!name) return;
-            const pwd = prompt('Пароль группы:');
-            if (!pwd) return;
-            const desc = prompt('Описание:', '');
-            try {
-                await createGroup(name, pwd, null, desc || '');
-                showToast('Группа создана');
-                await renderMainScreen();
-            } catch(e) { showToast(e.message, true); }
-        };
-        document.getElementById('newDirectBtn').onclick = () => {
-            const other = prompt('Введите username собеседника:');
-            if (!other) return;
-            if (other === currentUser.username) { showToast('Нельзя создать чат с самим собой'); return; }
-            getOrCreateDirectChat(other).then(() => { renderMainScreen(); }).catch(e => showToast(e.message, true));
-        };
-        const searchInput = document.getElementById('searchChats');
-        const renderList = () => {
-            const term = searchInput.value.toLowerCase();
-            let items = [];
-            if (currentTab === 'groups') items = allGroups.filter(g => g.name.toLowerCase().includes(term));
-            else items = allDirectChats.filter(d => d.participants.some(p => p !== currentUser.username && getUserDisplayName(p).toLowerCase().includes(term)));
-            const container = document.getElementById('chatsList');
-            container.innerHTML = '';
-            if (!items.length) { container.innerHTML = '<div class="loader">Ничего не найдено</div>'; return; }
-            items.forEach(item => {
-                const isGroup = currentTab === 'groups';
-                const div = document.createElement('div');
-                div.className = 'item';
-                let title = '', subtitle = '', avatar = '';
-                if (isGroup) {
-                    title = item.name;
-                    subtitle = `👥 ${item.participants.length} участников`;
-                    avatar = item.avatar;
-                } else {
-                    const other = item.participants.find(p => p !== currentUser.username);
-                    title = getUserDisplayName(other);
-                    subtitle = `@${other}`;
-                    avatar = getUserAvatar(other);
-                }
-                div.innerHTML = `
-                    <div class="item-info">
-                        <img class="avatar" src="${avatar}" alt="avatar">
-                        <div class="item-details">
-                            <div class="item-title">${escapeHtml(title)}</div>
-                            <div class="item-sub">${escapeHtml(subtitle)}</div>
-                        </div>
-                    </div>
-                    <div class="item-actions">
-                        <button class="action-btn" data-id="${item.id}">🔓 Открыть</button>
-                        ${isGroup && (item.creator === currentUser.username || currentUser.username === ADMIN_NAME) ? `<button class="action-btn" data-settings="${item.id}">⚙️</button>` : ''}
-                        ${isGroup && (item.creator === currentUser.username || currentUser.username === ADMIN_NAME) ? `<button class="action-btn danger-btn" data-delete="${item.id}">🗑️</button>` : ''}
-                    </div>
-                `;
-                const openBtn = div.querySelector('.action-btn:not(.danger-btn):not([data-settings])');
-                openBtn.onclick = async () => {
-                    if (isGroup) {
-                        const group = allGroups.find(g => g.id === item.id);
-                        const pwd = prompt(`Введите пароль группы "${group.name}":`);
-                        if (!pwd) return;
-                        try {
-                            const raw = await getMessagesRaw(group.gistId);
-                            if (raw.length) decryptMessageObj(raw[0], pwd);
-                            await openChat({ type: 'group', id: group.id, data: group }, pwd);
-                        } catch(e) { showToast(e.message, true); }
-                    } else {
-                        const direct = allDirectChats.find(d => d.id === item.id);
-                        await openChat({ type: 'direct', id: direct.id, data: direct }, null);
-                    }
-                };
-                const settingsBtn = div.querySelector('[data-settings]');
-                if (settingsBtn) settingsBtn.onclick = () => showGroupSettings(item);
-                const delBtn = div.querySelector('[data-delete]');
-                if (delBtn) delBtn.onclick = async () => {
-                    if (confirm(`Удалить группу "${item.name}"?`)) {
-                        try { await deleteGroup(item.id, item.gistId); await renderMainScreen(); }
-                        catch(e) { showToast(e.message, true); }
-                    }
-                };
-                container.appendChild(div);
-            });
-        };
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.onclick = () => {
-                currentTab = tab.dataset.tab;
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                renderList();
-            };
-            if (tab.dataset.tab === currentTab) tab.classList.add('active');
-        });
         searchInput.oninput = renderList;
         renderList();
     }
 
-    async function openChat(chat, password) {
-        if (pollInterval) clearInterval(pollInterval);
-        currentChat = chat;
+    async function loginAndProceed(name, password) {
         try {
-            messages = await loadMessages(chat);
+            await loginAccount(name, password);
+            await renderGroupsScreen();
+        } catch (e) { showToast(e.message, true); }
+    }
+
+    async function renderGroupsScreen() {
+        const main = await getMainGist();
+        allGroups = main.groups || [];
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('groupsScreen').classList.remove('hidden');
+        document.getElementById('chatScreen').classList.add('hidden');
+        const isAdmin = currentUser.name === ADMIN_NAME;
+        document.getElementById('groupsUserName').innerHTML = `<img class="avatar" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;" src="${currentUser.avatar || defaultAvatar(currentUser.name, 'account')}"> ${escapeHtml(currentUser.name)}${isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}`;
+        const searchInput = document.getElementById('searchGroups');
+        const renderList = () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filtered = allGroups.filter(g => g.name.toLowerCase().includes(searchTerm));
+            const container = document.getElementById('groupsList');
+            container.innerHTML = '';
+            if (filtered.length === 0) { container.innerHTML = '<div class="loader">Групп не найдено</div>'; return; }
+            filtered.forEach(group => {
+                const isMember = group.participants.includes(currentUser.name);
+                const isCreator = group.creator === currentUser.name;
+                const showSettings = isCreator || isAdmin;
+                const showDelete = isCreator || isAdmin;
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <img class="avatar" src="${group.avatar || defaultAvatar(group.name, 'group')}" alt="avatar">
+                        <div class="item-details">
+                            <div class="item-title">${escapeHtml(group.name)}</div>
+                            <div class="item-sub">👥 ${group.participants.length} участников</div>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        ${isMember ? `<button class="action-btn" data-action="open">🔓 Открыть</button>` : `<button class="action-btn" data-action="join">🔗 Присоединиться</button>`}
+                        ${showSettings ? `<button class="action-btn" data-action="settings">⚙️</button>` : ''}
+                        ${showDelete ? `<button class="action-btn danger-btn" data-action="delete">🗑️</button>` : ''}
+                    </div>
+                `;
+                const openBtn = div.querySelector('[data-action="open"]');
+                if (openBtn) {
+                    openBtn.onclick = async () => {
+                        const pwd = prompt(`Введите пароль группы "${group.name}":`);
+                        if (pwd) {
+                            try {
+                                const rawMsgs = await getGroupMessagesRaw(group.gistId);
+                                if (rawMsgs.length > 0) decryptMessageObj(rawMsgs[0], pwd);
+                                await openChat(group, pwd);
+                            } catch (e) { showToast(e.message, true); }
+                        }
+                    };
+                }
+                const joinBtn = div.querySelector('[data-action="join"]');
+                if (joinBtn) {
+                    joinBtn.onclick = async () => {
+                        const pwd = prompt(`Введите пароль группы "${group.name}":`);
+                        if (pwd) {
+                            try {
+                                await joinGroup(group, pwd);
+                                showToast('Вы присоединились к группе');
+                                await renderGroupsScreen();
+                                await openChat(group, pwd);
+                            } catch (e) { showToast(e.message, true); }
+                        }
+                    };
+                }
+                const settingsBtn = div.querySelector('[data-action="settings"]');
+                if (settingsBtn) {
+                    settingsBtn.onclick = () => showGroupSettings(group);
+                }
+                const deleteBtn = div.querySelector('[data-action="delete"]');
+                if (deleteBtn) {
+                    deleteBtn.onclick = async () => {
+                        if (confirm(`Удалить группу "${group.name}"? Это действие необратимо.`)) {
+                            try {
+                                await deleteGroup(group.id, group.gistId);
+                                showToast('Группа удалена');
+                                if (currentGroup && currentGroup.id === group.id) {
+                                    if (pollInterval) clearInterval(pollInterval);
+                                    currentGroup = null;
+                                }
+                                await renderGroupsScreen();
+                            } catch (e) { showToast(e.message, true); }
+                        }
+                    };
+                }
+                container.appendChild(div);
+            });
+        };
+        searchInput.oninput = renderList;
+        renderList();
+    }
+
+    async function openChat(group, groupPassword) {
+        if (pollInterval) clearInterval(pollInterval);
+        currentGroup = group;
+        activeGroupPassword = groupPassword;
+        try {
+            messages = await loadAndDecryptMessages(group.gistId, groupPassword);
             renderChatMessages();
-            document.getElementById('mainScreen').classList.add('hidden');
+            document.getElementById('groupsScreen').classList.add('hidden');
             document.getElementById('chatScreen').classList.remove('hidden');
-            let title = '';
-            if (chat.type === 'group') title = chat.data.name;
-            else {
-                const other = chat.data.participants.find(p => p !== currentUser.username);
-                title = getUserDisplayName(other);
-            }
-            document.getElementById('chatTitle').innerHTML = `<img class="avatar" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;" src="${chat.type === 'group' ? chat.data.avatar : getUserAvatar(other)}"> ${escapeHtml(title)}`;
+            document.getElementById('chatGroupTitle').innerHTML = `<img class="avatar" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;" src="${group.avatar || defaultAvatar(group.name, 'group')}"> ${escapeHtml(group.name)}`;
             pollInterval = setInterval(async () => {
-                if (currentChat) {
+                if (currentGroup && activeGroupPassword) {
                     try {
-                        const newMsgs = await loadMessages(currentChat);
+                        const newMsgs = await loadAndDecryptMessages(currentGroup.gistId, activeGroupPassword);
                         if (JSON.stringify(newMsgs) !== JSON.stringify(messages)) {
                             messages = newMsgs;
                             renderChatMessages();
                         }
-                    } catch(e) { console.warn(e); }
+                    } catch (e) { console.warn('poll err', e); }
                 }
             }, 4000);
-        } catch(e) { showToast(`Ошибка загрузки чата: ${e.message}`, true); renderMainScreen(); }
+        } catch (e) { showToast(`Ошибка загрузки чата: ${e.message}`, true); renderGroupsScreen(); }
     }
 
     function renderChatMessages() {
@@ -1033,29 +869,22 @@
         container.innerHTML = '';
         messages.forEach(msg => {
             if (msg.error) {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'message-wrapper message-other';
-                wrapper.innerHTML = `<div class="message-avatar" style="background:var(--border);"></div><div class="message-bubble">${escapeHtml(msg.content)}</div>`;
-                container.appendChild(wrapper);
+                const div = document.createElement('div');
+                div.className = 'message message-other';
+                div.innerHTML = `<div>[Ошибка расшифровки]</div>`;
+                container.appendChild(div);
                 return;
             }
-            const isOwn = msg.author === currentUser.username;
-            const wrapper = document.createElement('div');
-            wrapper.className = `message-wrapper ${isOwn ? 'message-own' : 'message-other'}`;
-            const avatarUrl = getUserAvatar(msg.author);
+            const isOwn = msg.author === currentUser.name;
+            const div = document.createElement('div');
+            div.className = `message ${isOwn ? 'message-own' : 'message-other'}`;
             let contentHtml = '';
             if (msg.type === 'text') contentHtml = `<div>${escapeHtml(msg.content)}</div>`;
             else if (msg.type === 'image') contentHtml = `<img src="data:image/jpeg;base64,${msg.content}" class="message-img" onclick="window.open(this.src)">`;
             else if (msg.type === 'voice') contentHtml = `<audio controls src="data:audio/webm;base64,${msg.content}"></audio>`;
             const deleteBtn = isOwn ? `<button class="delete-btn" data-id="${msg.id}">🗑️</button>` : '';
-            wrapper.innerHTML = `
-                <img class="message-avatar" src="${avatarUrl}" alt="avatar">
-                <div class="message-bubble">
-                    ${contentHtml}
-                    <div class="message-meta">${new Date(msg.timestamp).toLocaleTimeString()} ${getUserDisplayName(msg.author)} ${deleteBtn}</div>
-                </div>
-            `;
-            container.appendChild(wrapper);
+            div.innerHTML = contentHtml + `<div class="message-meta">${new Date(msg.timestamp).toLocaleTimeString()} ${msg.author} ${deleteBtn}</div>`;
+            container.appendChild(div);
         });
         container.scrollTop = container.scrollHeight;
         document.querySelectorAll('.delete-btn').forEach(btn => {
@@ -1064,30 +893,44 @@
                 const msgId = btn.getAttribute('data-id');
                 if (confirm('Удалить сообщение?')) {
                     try {
-                        await deleteMessage(currentChat, msgId, currentUser.username);
-                        messages = await loadMessages(currentChat);
+                        await deleteMessageFromGroup(currentGroup.gistId, activeGroupPassword, msgId, currentUser.name);
+                        messages = await loadAndDecryptMessages(currentGroup.gistId, activeGroupPassword);
                         renderChatMessages();
-                    } catch(e) { showToast(e.message, true); }
+                    } catch (e) { showToast(e.message, true); }
                 }
             };
         });
     }
 
     async function sendTextMessage(text) {
-        if (!text.trim() || !currentChat) return;
-        const msgObj = { id: Date.now()+'-'+Math.random(), author: currentUser.username, timestamp: Date.now(), type: 'text', content: text.trim() };
-        await sendMessage(currentChat, msgObj);
-        messages = await loadMessages(currentChat);
-        renderChatMessages();
-    }
-    async function sendMediaMessage(type, base64Data) {
-        if (!currentChat) return;
-        const msgObj = { id: Date.now()+'-'+Math.random(), author: currentUser.username, timestamp: Date.now(), type, content: base64Data };
-        await sendMessage(currentChat, msgObj);
-        messages = await loadMessages(currentChat);
+        if (!text.trim() || !currentGroup || !activeGroupPassword) return;
+        const msgObj = {
+            id: Date.now() + '-' + Math.random(),
+            author: currentUser.name,
+            timestamp: Date.now(),
+            type: 'text',
+            content: text.trim()
+        };
+        await sendNewMessage(currentGroup.gistId, activeGroupPassword, msgObj);
+        messages = await loadAndDecryptMessages(currentGroup.gistId, activeGroupPassword);
         renderChatMessages();
     }
 
+    async function sendMediaMessage(type, base64Data) {
+        if (!currentGroup || !activeGroupPassword) return;
+        const msgObj = {
+            id: Date.now() + '-' + Math.random(),
+            author: currentUser.name,
+            timestamp: Date.now(),
+            type: type,
+            content: base64Data
+        };
+        await sendNewMessage(currentGroup.gistId, activeGroupPassword, msgObj);
+        messages = await loadAndDecryptMessages(currentGroup.gistId, activeGroupPassword);
+        renderChatMessages();
+    }
+
+    // Медиа
     function handleImageUpload() {
         const input = document.createElement('input');
         input.type = 'file';
@@ -1096,12 +939,19 @@
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = async (ev) => { await sendMediaMessage('image', ev.target.result.split(',')[1]); };
+            reader.onload = async (ev) => {
+                const base64 = ev.target.result.split(',')[1];
+                await sendMediaMessage('image', base64);
+            };
             reader.readAsDataURL(file);
         };
         input.click();
     }
-    let mediaRecorder, audioChunks, isRecording = false, mediaStream;
+
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let mediaStream = null;
     async function startVoiceRecording() {
         if (isRecording) return;
         try {
@@ -1112,7 +962,11 @@
             mediaRecorder.onstop = async () => {
                 const blob = new Blob(audioChunks, { type: 'audio/webm' });
                 const reader = new FileReader();
-                reader.onload = async (ev) => { await sendMediaMessage('voice', ev.target.result.split(',')[1]); if (mediaStream) mediaStream.getTracks().forEach(t => t.stop()); };
+                reader.onload = async (ev) => {
+                    const base64 = ev.target.result.split(',')[1];
+                    await sendMediaMessage('voice', base64);
+                    if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+                };
                 reader.readAsDataURL(blob);
                 isRecording = false;
                 document.getElementById('voiceRecordBtn').style.background = 'var(--accent)';
@@ -1121,12 +975,75 @@
             isRecording = true;
             document.getElementById('voiceRecordBtn').style.background = 'var(--accent-hover)';
             showToast('Запись... отпустите кнопку');
-        } catch(e) { showToast('Ошибка доступа к микрофону', true); }
+        } catch (e) { showToast('Ошибка доступа к микрофону', true); }
     }
-    function stopVoiceRecording() { if (mediaRecorder && isRecording) mediaRecorder.stop(); }
+    function stopVoiceRecording() {
+        if (mediaRecorder && isRecording) mediaRecorder.stop();
+    }
+
+    // Настройки аккаунта с темой
+    function showAccountSettings() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <h3>Настройки аккаунта</h3>
+                <img class="avatar-preview" id="accAvatarPreview" src="${currentUser.avatar}">
+                <input type="file" id="accAvatarInput" accept="image/*">
+                <input type="password" id="accNewPassword" placeholder="Новый пароль (оставьте пустым)">
+                <div style="margin: 12px 0; display: flex; align-items: center; justify-content: space-between;">
+                    <span>🌓 Тема:</span>
+                    <select id="themeSelect">
+                        <option value="dark">Тёмная</option>
+                        <option value="light">Светлая</option>
+                    </select>
+                </div>
+                <button id="saveAccSettings">Сохранить</button>
+                <button id="closeModal">Отмена</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        const themeSelect = modal.querySelector('#themeSelect');
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        themeSelect.value = currentTheme;
+        
+        const avatarInput = modal.querySelector('#accAvatarInput');
+        avatarInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => modal.querySelector('#accAvatarPreview').src = ev.target.result;
+                reader.readAsDataURL(file);
+            }
+        };
+        modal.querySelector('#saveAccSettings').onclick = async () => {
+            const newPassword = modal.querySelector('#accNewPassword').value;
+            const avatar = modal.querySelector('#accAvatarPreview').src;
+            const theme = themeSelect.value;
+            const updates = {};
+            if (avatar !== currentUser.avatar) updates.avatar = avatar;
+            if (newPassword) updates.passwordHash = hashPassword(newPassword);
+            try {
+                if (Object.keys(updates).length) await updateAccount(currentUser.name, updates);
+                if (newPassword) currentUser.passwordHash = updates.passwordHash;
+                if (avatar) currentUser.avatar = avatar;
+                // Применяем тему
+                document.body.className = theme;
+                localStorage.setItem('theme', theme);
+                showToast('Настройки сохранены');
+                modal.remove();
+                await renderGroupsScreen();
+            } catch (e) { showToast(e.message, true); }
+        };
+        modal.querySelector('#closeModal').onclick = () => modal.remove();
+    }
 
     function showGroupSettings(group) {
-        if (group.creator !== currentUser.username && currentUser.username !== ADMIN_NAME) { showToast('Нет прав'); return; }
+        if (group.creator !== currentUser.name && currentUser.name !== ADMIN_NAME) {
+            showToast('Только создатель или администратор может изменять настройки', true);
+            return;
+        }
         const modal = document.createElement('div');
         modal.className = 'modal';
         modal.innerHTML = `
@@ -1141,14 +1058,19 @@
             </div>
         `;
         document.body.appendChild(modal);
-        document.getElementById('groupAvatarInput').onchange = (e) => {
+        const avatarInput = modal.querySelector('#groupAvatarInput');
+        avatarInput.onchange = (e) => {
             const file = e.target.files[0];
-            if (file) { const reader = new FileReader(); reader.onload = ev => document.getElementById('groupAvatarPreview').src = ev.target.result; reader.readAsDataURL(file); }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => modal.querySelector('#groupAvatarPreview').src = ev.target.result;
+                reader.readAsDataURL(file);
+            }
         };
-        document.getElementById('saveGroupSettings').onclick = async () => {
-            const newName = document.getElementById('groupNameInput').value.trim();
-            const newDesc = document.getElementById('groupDescInput').value;
-            const avatar = document.getElementById('groupAvatarPreview').src;
+        modal.querySelector('#saveGroupSettings').onclick = async () => {
+            const newName = modal.querySelector('#groupNameInput').value.trim();
+            const newDesc = modal.querySelector('#groupDescInput').value;
+            const avatar = modal.querySelector('#groupAvatarPreview').src;
             if (!newName) return showToast('Название не может быть пустым');
             const updates = { name: newName, description: newDesc };
             if (avatar !== group.avatar) updates.avatar = avatar;
@@ -1156,125 +1078,139 @@
                 await updateGroupMetadata(group.id, updates);
                 showToast('Группа обновлена');
                 modal.remove();
-                await renderMainScreen();
-                if (currentChat && currentChat.type === 'group' && currentChat.id === group.id) {
-                    currentChat.data = { ...currentChat.data, ...updates };
-                    document.getElementById('chatTitle').innerHTML = `<img class="avatar" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;" src="${updates.avatar || currentChat.data.avatar}"> ${escapeHtml(newName)}`;
+                if (currentGroup && currentGroup.id === group.id) {
+                    currentGroup = { ...currentGroup, ...updates };
+                    document.getElementById('chatGroupTitle').innerHTML = `<img class="avatar" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;" src="${updates.avatar || currentGroup.avatar}"> ${escapeHtml(newName)}`;
                 }
-            } catch(e) { showToast(e.message, true); }
-        };
-        document.getElementById('closeModal').onclick = () => modal.remove();
-    }
-
-    function showAccountSettings() {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `
-            <div class="modal-card">
-                <h3>Настройки аккаунта</h3>
-                <img class="avatar-preview" id="accAvatarPreview" src="${currentUser.avatar}">
-                <input type="file" id="accAvatarInput" accept="image/*">
-                <input type="text" id="accDisplayName" placeholder="Отображаемое имя" value="${escapeHtml(currentUser.displayName)}">
-                <div style="margin: 8px 0; background:var(--bg-input); padding:8px; border-radius:12px;"><small>Логин: ${escapeHtml(currentUser.username)}</small></div>
-                <input type="password" id="accNewPassword" placeholder="Новый пароль (оставьте пустым)">
-                <div style="margin: 12px 0; display: flex; align-items: center; justify-content: space-between;">
-                    <span>🌓 Тема:</span>
-                    <select id="themeSelect"><option value="dark">Тёмная</option><option value="light">Светлая</option></select>
-                </div>
-                <button id="saveAccSettings">Сохранить</button>
-                <button id="closeModal">Отмена</button>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        const themeSelect = modal.querySelector('#themeSelect');
-        themeSelect.value = localStorage.getItem('theme') || 'dark';
-        document.getElementById('accAvatarInput').onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) { const reader = new FileReader(); reader.onload = ev => document.getElementById('accAvatarPreview').src = ev.target.result; reader.readAsDataURL(file); }
-        };
-        document.getElementById('saveAccSettings').onclick = async () => {
-            const newDisplay = document.getElementById('accDisplayName').value.trim();
-            const newPassword = document.getElementById('accNewPassword').value;
-            const avatar = document.getElementById('accAvatarPreview').src;
-            const theme = themeSelect.value;
-            const updates = {};
-            if (newDisplay && newDisplay !== currentUser.displayName) updates.displayName = newDisplay;
-            if (avatar !== currentUser.avatar) updates.avatar = avatar;
-            if (newPassword) updates.passwordHash = hashPassword(newPassword);
-            try {
-                if (Object.keys(updates).length) await updateAccount(currentUser.username, updates);
-                if (newPassword) currentUser.passwordHash = updates.passwordHash;
-                if (avatar) currentUser.avatar = avatar;
-                if (newDisplay) currentUser.displayName = newDisplay;
-                document.body.className = theme;
-                localStorage.setItem('theme', theme);
-                showToast('Настройки сохранены');
-                modal.remove();
-                await renderMainScreen();
-            } catch(e) { showToast(e.message, true); }
+                await renderGroupsScreen();
+            } catch (e) { showToast(e.message, true); }
         };
         modal.querySelector('#closeModal').onclick = () => modal.remove();
     }
 
+    // ----- МОДАЛЬНОЕ ОКНО ДЛЯ ВВОДА ТОКЕНА -----
     function showTokenModal() {
         const modal = document.createElement('div');
         modal.className = 'token-modal';
         modal.innerHTML = `
             <div class="token-card">
-                <h3>🔐 Введите GitHub токен c <a href="https://docs.google.com/document/d/1YTx0oDH0DOz-qzmeMht7Kq-Pt_s_fNsdU7UhOPPUIRc/edit?usp=sharing" target="_blank">ССЫЛКИ</a></h3>
+                <h3>🔐 Введите GitHub токен c <a href="https://docs.google.com/document/d/1YTx0oDH0DOz-qzmeMht7Kq-Pt_s_fNsdU7UhOPPUIRc/edit?usp=sharing" target="_blank" rel="noopener noreferrer">ССЫЛКИ</a></h3>
                 <textarea id="tokenInput" rows="2" placeholder="ghp_..."></textarea>
                 <button id="copyTokenBtn" class="copy-btn">📋 Скопировать токен</button>
                 <button id="saveTokenBtn">✅ Далее</button>
-                <small>Токен сохранится в браузере. Нужен scope gist.</small>
+                <small>Токен сохранится в браузере.<br>
+                ⚠️ Для работы требуется токен с scope <code>gist</code>.</small>
             </div>
         `;
         document.body.appendChild(modal);
-        document.getElementById('copyTokenBtn').onclick = () => { document.getElementById('tokenInput').select(); document.execCommand('copy'); showToast('Токен скопирован'); };
-        document.getElementById('saveTokenBtn').onclick = async () => {
-            const token = document.getElementById('tokenInput').value.trim();
-            if (!token) return showToast('Введите токен', true);
+        
+        const tokenInput = modal.querySelector('#tokenInput');
+        const copyBtn = modal.querySelector('#copyTokenBtn');
+        const saveBtn = modal.querySelector('#saveTokenBtn');
+        
+        copyBtn.onclick = () => {
+            tokenInput.select();
+            document.execCommand('copy');
+            showToast('Токен скопирован в буфер');
+        };
+        
+        saveBtn.onclick = async () => {
+            const token = tokenInput.value.trim();
+            if (!token) {
+                showToast('Введите токен', true);
+                return;
+            }
             try {
-                const test = await fetch('https://api.github.com/user', { headers: { 'Authorization': `token ${token}` } });
-                if (!test.ok) throw new Error('Токен недействителен');
-                await fetch(`https://api.github.com/gists/${MAIN_GIST_ID}`, { headers: { 'Authorization': `token ${token}` } });
+                const testRes = await fetch('https://api.github.com/user', {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+                if (!testRes.ok) throw new Error('Токен недействителен');
+                const gistRes = await fetch(`https://api.github.com/gists/${MAIN_GIST_ID}`, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+                if (!gistRes.ok) throw new Error('Нет доступа к Gist или Gist не найден');
+                
                 GITHUB_TOKEN = token;
                 localStorage.setItem('github_token', token);
                 modal.remove();
                 renderLoginScreen();
-            } catch(err) { showToast('Ошибка: ' + err.message, true); }
+            } catch (err) {
+                showToast('Ошибка: ' + err.message, true);
+            }
         };
     }
 
+    // Инициализация
     (async function init() {
         const savedTheme = localStorage.getItem('theme') || 'dark';
         document.body.className = savedTheme;
+        
         const savedToken = localStorage.getItem('github_token');
         if (savedToken) {
             GITHUB_TOKEN = savedToken;
             try {
-                await fetch(`https://api.github.com/gists/${MAIN_GIST_ID}`, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
+                await fetch(`https://api.github.com/gists/${MAIN_GIST_ID}`, {
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                });
                 renderLoginScreen();
-            } catch { localStorage.removeItem('github_token'); showTokenModal(); }
-        } else showTokenModal();
+            } catch (e) {
+                localStorage.removeItem('github_token');
+                showTokenModal();
+            }
+        } else {
+            showTokenModal();
+        }
     })();
 
+    // ----- ОБРАБОТЧИКИ UI -----
     document.getElementById('createAccBtn').onclick = async () => {
         const name = document.getElementById('newAccName').value.trim();
         const pass = document.getElementById('newAccPass').value;
-        if (!name || !pass) return showToast('Введите логин и пароль');
-        try { await createAccount(name, pass); showToast('Аккаунт создан, войдите'); renderLoginScreen(); }
-        catch(e) { showToast(e.message, true); }
+        if (!name || !pass) return showToast('Введите имя и пароль');
+        try {
+            await createAccount(name, pass);
+            showToast('Аккаунт создан, войдите');
+            renderLoginScreen();
+        } catch (e) { showToast(e.message, true); }
     };
-    document.getElementById('logoutBtn').onclick = () => { if(pollInterval) clearInterval(pollInterval); currentUser = null; renderLoginScreen(); };
-    document.getElementById('backToMainBtn').onclick = async () => { if(pollInterval) clearInterval(pollInterval); await renderMainScreen(); };
-    document.getElementById('sendTextBtn').onclick = () => { const inp = document.getElementById('messageInput'); sendTextMessage(inp.value); inp.value = ''; };
-    document.getElementById('messageInput').addEventListener('keypress', e => { if(e.key === 'Enter') document.getElementById('sendTextBtn').click(); });
+    document.getElementById('logoutBtn').onclick = () => {
+        if (pollInterval) clearInterval(pollInterval);
+        currentUser = null;
+        renderLoginScreen();
+    };
+    document.getElementById('backToGroupsBtn').onclick = async () => {
+        if (pollInterval) clearInterval(pollInterval);
+        await renderGroupsScreen();
+    };
+    document.getElementById('createGroupBtn').onclick = async () => {
+        const name = prompt('Название группы:');
+        if (!name) return;
+        const pwd = prompt('Пароль группы (сид-фраза):');
+        if (!pwd) return;
+        const desc = prompt('Описание (необязательно):', '');
+        try {
+            const { group } = await createNewGroup(name, pwd, null, desc || '');
+            showToast(`Группа создана! Пароль: ${pwd}`);
+            await renderGroupsScreen();
+        } catch (e) { showToast(e.message, true); }
+    };
+    document.getElementById('sendTextBtn').onclick = () => {
+        const input = document.getElementById('messageInput');
+        sendTextMessage(input.value);
+        input.value = '';
+    };
+    document.getElementById('messageInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') document.getElementById('sendTextBtn').click();
+    });
     document.getElementById('attachImageBtn').onclick = handleImageUpload;
     document.getElementById('voiceRecordBtn').onmousedown = startVoiceRecording;
     document.getElementById('voiceRecordBtn').onmouseup = stopVoiceRecording;
-    document.getElementById('voiceRecordBtn').ontouchstart = e => { e.preventDefault(); startVoiceRecording(); };
-    document.getElementById('voiceRecordBtn').ontouchend = e => { e.preventDefault(); stopVoiceRecording(); };
-    document.getElementById('chatSettingsBtn').onclick = () => { if(currentChat && currentChat.type === 'group') showGroupSettings(currentChat.data); else showToast('Настройки только для групп'); };
+    document.getElementById('voiceRecordBtn').ontouchstart = (e) => { e.preventDefault(); startVoiceRecording(); };
+    document.getElementById('voiceRecordBtn').ontouchend = (e) => { e.preventDefault(); stopVoiceRecording(); };
+    document.getElementById('groupSettingsBtn').onclick = () => {
+        if (currentGroup) showGroupSettings(currentGroup);
+        else showToast('Группа не выбрана', true);
+    };
     document.getElementById('accountSettingsBtn').onclick = showAccountSettings;
 </script>
 </body>
